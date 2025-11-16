@@ -7,7 +7,12 @@ App mobile di gestione finanziaria personale con architettura **local-first** pe
 - **Privacy Massima**: Tutti i dati finanziari restano sul dispositivo, mai nel cloud
 - **Sicurezza Hardware**: Encryption con iOS Keychain e Android Keystore
 - **Offline-First**: Funziona completamente offline
+- **Budget Management**: Tracking spese con alerts e percentuali
+- **Analytics Avanzati**: Grafici interattivi (Pie charts, Line charts)
+- **CSV Import/Export**: Gestione sicura con validazione e sanitizzazione
 - **Backup Cifrato E2E**: Backup opzionale con cifratura client-side
+- **Calcoli Precisi**: big.js per evitare errori floating-point
+- **Navigation**: Bottom tabs per Transazioni, Budget, Analytics
 - **Open Banking Ready**: Struttura preparata per integrazione PSD2/GoCardless
 - **GDPR Compliant**: Right to erasure, data portability integrati
 
@@ -104,23 +109,32 @@ npm run android
 
 ## 📱 Features Implementate
 
-### ✅ Core Infrastructure
+### ✅ Core Infrastructure & Features
 
 - [x] SecureDatabase con encryption locale
-- [x] AuthService con biometria
+- [x] AuthService con biometria + PIN
 - [x] BackupService con E2E encryption
 - [x] Type system completo TypeScript
-- [x] Transaction management hooks
-- [x] TransactionList component ottimizzato
+- [x] Transaction management CRUD completo
+- [x] Budget management con tracking spesa
+- [x] Analytics dashboard con Pie/Line charts
+- [x] CSV import/export sicuro
+- [x] Financial calculations (big.js)
+- [x] React Navigation con bottom tabs
+- [x] 3 schermate complete (Transactions, Budget, Analytics)
+- [x] Categorie predefinite (10 categorie)
+- [x] Form modals per aggiunta dati
 
-### 🚧 In Sviluppo
+### 🚧 Future Enhancements
 
-- [ ] Budget management
-- [ ] Analytics dashboard con charts
-- [ ] CSV import/export
-- [ ] GoCardless integration
+- [ ] GoCardless integration (PSD2 Open Banking)
 - [ ] Receipt scanning (OCR)
 - [ ] Multi-currency support
+- [ ] Export PDF reports
+- [ ] Cloud backup opzionale
+- [ ] Push notifications per budget warnings
+- [ ] Recurring transactions
+- [ ] Financial goals tracking
 
 ## 🧪 Testing
 

@@ -297,6 +297,145 @@ class SecureDatabase {
   }
 
   /**
+   * Recupera tutti i budget
+   */
+  async getAllBudgets(): Promise<Budget[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getAllAsync<any>(
+      'SELECT * FROM budgets ORDER BY start_date DESC'
+    );
+
+    return result.map(row => this.mapRowToBudget(row));
+  }
+
+  /**
+   * Recupera budget attivi (dentro il periodo corrente)
+   */
+  async getActiveBudgets(): Promise<Budget[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const now = Date.now();
+
+    const result = await this.db.getAllAsync<any>(
+      `SELECT * FROM budgets
+       WHERE start_date <= ?
+       AND (end_date IS NULL OR end_date >= ?)
+       ORDER BY start_date DESC`,
+      [now, now]
+    );
+
+    return result.map(row => this.mapRowToBudget(row));
+  }
+
+  /**
+   * Recupera budget per categoria specifica
+   */
+  async getBudgetByCategory(category: string): Promise<Budget | null> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getFirstAsync<any>(
+      'SELECT * FROM budgets WHERE category = ? ORDER BY start_date DESC LIMIT 1',
+      [category]
+    );
+
+    return result ? this.mapRowToBudget(result) : null;
+  }
+
+  /**
+   * Aggiorna la spesa corrente di un budget
+   */
+  async updateBudgetSpent(budgetId: string, spent: number): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.runAsync(
+      'UPDATE budgets SET spent = ? WHERE id = ?',
+      [spent, budgetId]
+    );
+  }
+
+  /**
+   * Calcola spesa per categoria in un periodo
+   */
+  async getSpendingByCategory(category: string, startDate: number, endDate: number): Promise<number> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getFirstAsync<any>(
+      `SELECT SUM(ABS(amount)) as total
+       FROM transactions
+       WHERE category = ?
+       AND date >= ?
+       AND date <= ?
+       AND amount < 0`,
+      [category, startDate, endDate]
+    );
+
+    return result?.total || 0;
+  }
+
+  /**
+   * Inserisce una categoria predefinita
+   */
+  async insertCategory(category: Omit<Category, 'id'>): Promise<string> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const id = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      `${Date.now()}-${category.name}-${Math.random()}`
+    );
+
+    try {
+      await this.db.runAsync(
+        `INSERT INTO categories (id, name, icon, color, type) VALUES (?, ?, ?, ?, ?)`,
+        [id, category.name, category.icon || null, category.color || null, category.type]
+      );
+
+      return id;
+    } catch (error) {
+      // Ignora errore se categoria già esistente
+      console.warn('Category might already exist:', category.name);
+      return id;
+    }
+  }
+
+  /**
+   * Recupera tutte le categorie
+   */
+  async getAllCategories(): Promise<Category[]> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const result = await this.db.getAllAsync<any>(
+      'SELECT * FROM categories ORDER BY name'
+    );
+
+    return result.map(row => this.mapRowToCategory(row));
+  }
+
+  /**
+   * Inizializza categorie predefinite
+   */
+  async initializeDefaultCategories(): Promise<void> {
+    const defaultCategories = [
+      { name: 'Food', icon: '🍔', color: '#FF6B6B', type: 'expense' as const },
+      { name: 'Transport', icon: '🚗', color: '#4ECDC4', type: 'expense' as const },
+      { name: 'Shopping', icon: '🛍️', color: '#FFD93D', type: 'expense' as const },
+      { name: 'Bills', icon: '💳', color: '#6C5CE7', type: 'expense' as const },
+      { name: 'Entertainment', icon: '🎬', color: '#FF8787', type: 'expense' as const },
+      { name: 'Health', icon: '🏥', color: '#A8E6CF', type: 'expense' as const },
+      { name: 'Education', icon: '📚', color: '#95E1D3', type: 'expense' as const },
+      { name: 'Salary', icon: '💰', color: '#4CAF50', type: 'income' as const },
+      { name: 'Investment', icon: '📈', color: '#00BCD4', type: 'income' as const },
+      { name: 'Other', icon: '📌', color: '#95A5A6', type: 'expense' as const }
+    ];
+
+    for (const category of defaultCategories) {
+      await this.insertCategory(category);
+    }
+
+    console.log('Default categories initialized');
+  }
+
+  /**
    * Cancella tutto il database (GDPR right to erasure)
    */
   async deleteAllData(): Promise<void> {
@@ -344,6 +483,28 @@ class SecureDatabase {
       bankConnectionId: row.bank_connection_id,
       lastSync: row.last_sync,
       isManual: row.is_manual === 1
+    };
+  }
+
+  private mapRowToBudget(row: any): Budget {
+    return {
+      id: row.id,
+      category: row.category,
+      limit: row.limit_amount,
+      period: row.period,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      spent: row.spent || 0
+    };
+  }
+
+  private mapRowToCategory(row: any): Category {
+    return {
+      id: row.id,
+      name: row.name,
+      icon: row.icon,
+      color: row.color,
+      type: row.type
     };
   }
 }
