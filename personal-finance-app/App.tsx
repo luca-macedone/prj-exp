@@ -15,6 +15,10 @@ import {
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { enableScreens } from 'react-native-screens';
+
+// Enable screens for better performance and New Architecture compatibility
+enableScreens(true);
 import AuthService from './src/services/authentication/AuthService';
 import SecureDatabase from './src/services/storage/SecureDatabase';
 
@@ -221,7 +225,10 @@ export default function App() {
           tabBarLabelStyle: {
             fontSize: 12,
             fontWeight: '600'
-          }
+          },
+          lazy: true,
+          unmountOnBlur: false,
+          freezeOnBlur: false
         }}
       >
         <Tab.Screen
