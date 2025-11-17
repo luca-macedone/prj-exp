@@ -131,7 +131,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             }}
             accessor="population"
             backgroundColor="transparent"
-            paddingLeft="15"
+            paddingLeft={15}
             absolute
           />
 
@@ -174,8 +174,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 borderRadius: 16
               },
               propsForDots: {
-                r: '4',
-                strokeWidth: '2'
+                r: 4,
+                strokeWidth: 2
               }
             }}
             bezier
