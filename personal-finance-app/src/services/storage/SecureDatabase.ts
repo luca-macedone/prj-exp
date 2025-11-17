@@ -482,7 +482,7 @@ class SecureDatabase {
       currency: row.currency,
       bankConnectionId: row.bank_connection_id,
       lastSync: row.last_sync,
-      isManual: row.is_manual === 1
+      isManual: Boolean(Number(row.is_manual))
     };
   }
 
