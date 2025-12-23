@@ -7,7 +7,7 @@
  */
 
 import * as Crypto from 'expo-crypto';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 import SecureDatabase from './SecureDatabase';
 import { Transaction, Account, Budget, Category, EncryptedBackup } from '../../types';

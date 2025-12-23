@@ -109,7 +109,7 @@ export default function App() {
             },
             {
               text: 'OK',
-              onPress: async (pin) => {
+              onPress: async (pin?: string) => {
                 if (pin) {
                   const pinResult = await AuthService.verifyPIN(pin);
                   if (pinResult.success) {
@@ -226,9 +226,7 @@ export default function App() {
             fontSize: 12,
             fontWeight: '600'
           },
-          lazy: true,
-          unmountOnBlur: false,
-          freezeOnBlur: false
+          lazy: true
         }}
       >
         <Tab.Screen

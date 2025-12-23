@@ -131,7 +131,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             }}
             accessor="population"
             backgroundColor="transparent"
-            paddingLeft={15}
+            paddingLeft="15"
             absolute
           />
 
