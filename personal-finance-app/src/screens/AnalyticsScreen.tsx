@@ -7,10 +7,10 @@ import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   Text,
   TouchableOpacity
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AnalyticsDashboard } from '../features/analytics';
 import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
 

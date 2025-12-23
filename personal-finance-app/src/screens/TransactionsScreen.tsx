@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   Button,
   Alert,
   Modal,
@@ -16,6 +15,7 @@ import {
   TouchableOpacity,
   ScrollView
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TransactionList } from '../features/transactions';
 import { useTransactions } from '../features/transactions/hooks/useTransactions';
 import SecureDatabase from '../services/storage/SecureDatabase';

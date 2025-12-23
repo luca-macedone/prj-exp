@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   Button,
   Alert,
   Modal,
@@ -16,6 +15,7 @@ import {
   TouchableOpacity,
   ScrollView
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BudgetList } from '../features/budget';
 import { useBudgets } from '../features/budget/hooks/useBudgets';
 
