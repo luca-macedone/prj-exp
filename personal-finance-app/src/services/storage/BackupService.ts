@@ -7,7 +7,7 @@
  */
 
 import * as Crypto from 'expo-crypto';
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 import SecureDatabase from './SecureDatabase';
 import { Transaction, Account, Budget, Category, EncryptedBackup } from '../../types';
@@ -148,7 +148,7 @@ class BackupService {
       // Per demo, legge dal file locale più recente
       const backupDir = FileSystem.documentDirectory;
       const files = await FileSystem.readDirectoryAsync(backupDir!);
-      const backupFiles = files.filter(f => f.startsWith('backup_'));
+      const backupFiles = files.filter((f: string) => f.startsWith('backup_'));
 
       if (backupFiles.length === 0) {
         return null;
