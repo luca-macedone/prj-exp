@@ -1,108 +1,79 @@
 /**
- * Personal Finance App - Testing Navigation
+ * Personal Finance App - Testing useState
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
-  View
+  View,
+  TouchableOpacity
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-const Tab = createBottomTabNavigator();
-
-// Dummy screens per test
-function TransactionsScreen() {
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.screenTitle}>💳 Transazioni</Text>
-      <Text style={styles.screenText}>Schermata funzionante</Text>
-    </View>
-  );
-}
-
-function BudgetScreen() {
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.screenTitle}>🎯 Budget</Text>
-      <Text style={styles.screenText}>Schermata funzionante</Text>
-    </View>
-  );
-}
-
-function AnalyticsScreen() {
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.screenTitle}>📊 Analytics</Text>
-      <Text style={styles.screenText}>Schermata funzionante</Text>
-    </View>
-  );
-}
 
 export default function App() {
+  const [count, setCount] = useState(0);
+  const [text, setText] = useState('Funziona!');
+
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarActiveTintColor: '#007AFF',
-            tabBarInactiveTintColor: '#8E8E93'
-          }}
+      <View style={styles.container}>
+        <Text style={styles.title}>Finance App - Test useState</Text>
+        <Text style={styles.subtitle}>{text}</Text>
+        <Text style={styles.count}>Contatore: {count}</Text>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setCount(count + 1)}
         >
-          <Tab.Screen
-            name="Transactions"
-            component={TransactionsScreen}
-            options={{
-              tabBarLabel: 'Transazioni',
-              tabBarIcon: () => <Text style={styles.icon}>💳</Text>
-            }}
-          />
-          <Tab.Screen
-            name="Budget"
-            component={BudgetScreen}
-            options={{
-              tabBarLabel: 'Budget',
-              tabBarIcon: () => <Text style={styles.icon}>🎯</Text>
-            }}
-          />
-          <Tab.Screen
-            name="Analytics"
-            component={AnalyticsScreen}
-            options={{
-              tabBarLabel: 'Analytics',
-              tabBarIcon: () => <Text style={styles.icon}>📊</Text>
-            }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+          <Text style={styles.buttonText}>Incrementa</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => setText('useState funziona!')}
+        >
+          <Text style={styles.buttonText}>Cambia Testo</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5F7FA',
     padding: 20
   },
-  screenTitle: {
-    fontSize: 32,
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#2C3E50',
     marginBottom: 12
   },
-  screenText: {
-    fontSize: 16,
+  subtitle: {
+    fontSize: 18,
     color: '#7F8C8D',
-    textAlign: 'center'
+    marginBottom: 20
   },
-  icon: {
-    fontSize: 24
+  count: {
+    fontSize: 32,
+    color: '#007AFF',
+    marginBottom: 30
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 8,
+    marginBottom: 15
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold'
   }
 });
