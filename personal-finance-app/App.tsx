@@ -1,5 +1,5 @@
 /**
- * Personal Finance App - Testing Navigation MINIMAL
+ * Personal Finance App - Testing Navigation WITHOUT SafeAreaProvider
  */
 
 import React from 'react';
@@ -8,7 +8,6 @@ import {
   Text,
   View
 } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
@@ -33,14 +32,12 @@ function Screen2() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Tab.Navigator>
-          <Tab.Screen name="Screen1" component={Screen1} />
-          <Tab.Screen name="Screen2" component={Screen2} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <Tab.Navigator>
+        <Tab.Screen name="Screen1" component={Screen1} />
+        <Tab.Screen name="Screen2" component={Screen2} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 
