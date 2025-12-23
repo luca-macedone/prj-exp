@@ -131,7 +131,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             }}
             accessor="population"
             backgroundColor="transparent"
-            paddingLeft="15"
+            // @ts-expect-error - paddingLeft type is incorrectly defined as string in library, but needs number at runtime
+            paddingLeft={15}
             absolute
           />
 
