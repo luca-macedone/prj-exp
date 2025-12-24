@@ -12,8 +12,10 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Budget } from '../../../types';
 import { BudgetStatus } from '../hooks/useBudgets';
+import { colors, spacing, borderRadius } from '../../../theme';
 
 interface BudgetListProps {
   budgets: Budget[];
@@ -53,7 +55,7 @@ export const BudgetList: React.FC<BudgetListProps> = ({
   if (loading && budgets.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Caricamento budget...</Text>
       </View>
     );
@@ -62,10 +64,27 @@ export const BudgetList: React.FC<BudgetListProps> = ({
   if (budgets.length === 0) {
     return (
       <View style={styles.centerContainer}>
+        <View style={styles.emptyIconContainer}>
+          <Ionicons name="wallet-outline" size={80} color={colors.text.tertiary} />
+        </View>
         <Text style={styles.emptyText}>Nessun budget configurato</Text>
         <Text style={styles.emptySubtext}>
-          Crea un budget per tenere sotto controllo le tue spese
+          Imposta limiti di spesa per categoria{'\n'}e monitora i tuoi progressi{'\n'}verso i tuoi obiettivi finanziari
         </Text>
+        <View style={styles.emptyTips}>
+          <View style={styles.tipItem}>
+            <Ionicons name="trophy" size={20} color={colors.warning} />
+            <Text style={styles.tipText}>Raggiungi i tuoi obiettivi di risparmio</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="shield-checkmark" size={20} color={colors.info} />
+            <Text style={styles.tipText}>Evita spese eccessive</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="trending-up" size={20} color={colors.success} />
+            <Text style={styles.tipText}>Migliora le tue abitudini finanziarie</Text>
+          </View>
+        </View>
       </View>
     );
   }
@@ -115,10 +134,35 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, status }) => {
     return labels[period] || period;
   };
 
+  const getCategoryIcon = (category: string): any => {
+    const icons: Record<string, any> = {
+      'Food': 'restaurant',
+      'Transport': 'car',
+      'Shopping': 'cart',
+      'Bills': 'receipt',
+      'Entertainment': 'game-controller',
+      'Health': 'medkit',
+      'Other': 'ellipsis-horizontal'
+    };
+    return icons[category] || 'ellipsis-horizontal';
+  };
+
+  const getCategoryColor = (category: string): string => {
+    return colors.categories[category as keyof typeof colors.categories] || colors.categories.Other;
+  };
+
+  const categoryIcon = getCategoryIcon(budget.category);
+  const categoryColor = getCategoryColor(budget.category);
+
   return (
     <View style={styles.card}>
       {/* Header */}
       <View style={styles.cardHeader}>
+        <View style={styles.categoryIconWrapper}>
+          <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+            <Ionicons name={categoryIcon} size={28} color={categoryColor} />
+          </View>
+        </View>
         <View style={styles.categoryInfo}>
           <Text style={styles.categoryName}>{budget.category}</Text>
           <Text style={styles.periodLabel}>{getPeriodLabel(budget.period)}</Text>
@@ -179,42 +223,70 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: spacing.xxxl
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: spacing.md,
     fontSize: 16,
-    color: '#666'
+    color: colors.text.secondary
+  },
+  emptyIconContainer: {
+    marginBottom: spacing.xxl
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: spacing.md
   },
   emptySubtext: {
+    fontSize: 15,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: spacing.xxxl
+  },
+  emptyTips: {
+    width: '100%',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    padding: spacing.xl
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md
+  },
+  tipText: {
+    marginLeft: spacing.md,
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center'
+    color: colors.text.primary,
+    flex: 1
   },
   listContainer: {
-    padding: 16
+    padding: spacing.lg
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    ...colors.shadow.md
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  categoryIconWrapper: {
+    marginRight: 12
+  },
+  categoryIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   categoryInfo: {
     flex: 1
@@ -222,12 +294,12 @@ const styles = StyleSheet.create({
   categoryName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2C3E50',
+    color: colors.text.primary,
     marginBottom: 4
   },
   periodLabel: {
     fontSize: 13,
-    color: '#7F8C8D'
+    color: colors.text.secondary
   },
   amountInfo: {
     alignItems: 'flex-end'
@@ -235,26 +307,26 @@ const styles = StyleSheet.create({
   spent: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#2C3E50',
+    color: colors.text.primary,
     marginBottom: 2
   },
   overBudget: {
-    color: '#E74C3C'
+    color: colors.error
   },
   limit: {
     fontSize: 13,
-    color: '#7F8C8D'
+    color: colors.text.secondary
   },
   progressBarContainer: {
     height: 8,
-    backgroundColor: '#ECF0F1',
-    borderRadius: 4,
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.sm,
     overflow: 'hidden',
-    marginBottom: 12
+    marginBottom: spacing.md
   },
   progressBar: {
     height: '100%',
-    borderRadius: 4
+    borderRadius: borderRadius.sm
   },
   cardFooter: {
     flexDirection: 'row',
@@ -263,37 +335,37 @@ const styles = StyleSheet.create({
   },
   remaining: {
     fontSize: 14,
-    color: '#7F8C8D'
+    color: colors.text.secondary
   },
   percentage: {
     fontSize: 16,
     fontWeight: '700'
   },
   warningBadge: {
-    marginTop: 12,
-    backgroundColor: '#FFF3CD',
-    padding: 8,
-    borderRadius: 8,
+    marginTop: spacing.md,
+    backgroundColor: colors.warning + '20',
+    padding: spacing.sm,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#FFC107'
+    borderColor: colors.warning
   },
   warningText: {
     fontSize: 13,
-    color: '#856404',
+    color: colors.warning,
     textAlign: 'center',
     fontWeight: '600'
   },
   overBudgetBadge: {
-    marginTop: 12,
-    backgroundColor: '#F8D7DA',
-    padding: 8,
-    borderRadius: 8,
+    marginTop: spacing.md,
+    backgroundColor: colors.error + '20',
+    padding: spacing.sm,
+    borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#E74C3C'
+    borderColor: colors.error
   },
   overBudgetText: {
     fontSize: 13,
-    color: '#721C24',
+    color: colors.error,
     textAlign: 'center',
     fontWeight: '600'
   }

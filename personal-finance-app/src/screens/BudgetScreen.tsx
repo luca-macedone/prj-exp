@@ -7,95 +7,107 @@ import React, { useState } from 'react';
 import {
   View,
   StyleSheet,
-  SafeAreaView,
-  Button,
-  Alert,
-  Modal,
-  TextInput,
-  Text,
   TouchableOpacity,
-  ScrollView
+  Text
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { BudgetList } from '../features/budget';
-import { useBudgets } from '../features/budget/hooks/useBudgets';
+import { QuickBudgetForm } from '../components/QuickBudgetForm';
+import { colors, spacing, borderRadius } from '../theme';
+import { useData } from '../context/DataContext';
 
 export const BudgetScreen: React.FC = () => {
   const {
     budgets,
     loading,
-    error,
     addBudget,
-    refreshBudgets,
-    getBudgetStatus
-  } = useBudgets();
+    refreshData,
+    transactions
+  } = useData();
 
+  const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [formData, setFormData] = useState({
-    category: 'Food',
-    limit: '',
-    period: 'monthly' as 'daily' | 'weekly' | 'monthly' | 'yearly'
-  });
 
-  const categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Health', 'Other'];
-  const periods = [
-    { value: 'daily', label: 'Giornaliero' },
-    { value: 'weekly', label: 'Settimanale' },
-    { value: 'monthly', label: 'Mensile' },
-    { value: 'yearly', label: 'Annuale' }
-  ];
+  // Calcola lo stato di un budget
+  const getBudgetStatus = (budget: any) => {
+    if (!budget) {
+      return {
+        spent: 0,
+        limit: 0,
+        remaining: 0,
+        percentage: 0,
+        isOverBudget: false,
+        isWarning: false
+      };
+    }
 
-  const handleAddBudget = async () => {
+    const spent = budget.spent || 0;
+    const limit = budget.limit || 0;
+    const remaining = limit - spent;
+    const percentage = limit > 0 ? (spent / limit) * 100 : 0;
+    const isOverBudget = percentage >= 100;
+    const isWarning = percentage >= 80 && !isOverBudget;
+
+    return {
+      spent,
+      limit,
+      remaining,
+      percentage,
+      isOverBudget,
+      isWarning
+    };
+  };
+
+  const handleAddBudget = async (data: {
+    category: string;
+    limit: number;
+    period: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  }) => {
     try {
-      const limit = parseFloat(formData.limit);
-
-      if (isNaN(limit) || limit <= 0) {
-        Alert.alert('Errore', 'Inserisci un limite valido');
-        return;
-      }
-
       const result = await addBudget({
-        category: formData.category,
-        limit,
-        period: formData.period,
+        category: data.category,
+        limit: data.limit,
+        period: data.period,
         startDate: Date.now()
       });
 
       if (result) {
-        Alert.alert('Successo', 'Budget creato!');
         setModalVisible(false);
-        setFormData({
-          category: 'Food',
-          limit: '',
-          period: 'monthly'
-        });
       }
     } catch (err) {
-      Alert.alert('Errore', 'Impossibile creare budget');
+      console.error('Errore creazione budget:', err);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Budget</Text>
-        <Text style={styles.headerSubtitle}>
-          {budgets.length} budget attivi
-        </Text>
+        <View>
+          <Text style={styles.headerTitle}>Budget</Text>
+          <Text style={styles.headerSubtitle}>
+            {budgets.length} budget attivi
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.filterButton}>
+          <Ionicons name="options" size={20} color={colors.text.secondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Add Button */}
-      <View style={styles.addButtonContainer}>
-        <Button
-          title="+ Nuovo Budget"
-          onPress={() => setModalVisible(true)}
-          color="#007AFF"
-        />
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Ionicons name="add-circle" size={24} color="#FFFFFF" />
+        <Text style={styles.addButtonText}>Nuovo Budget</Text>
+      </TouchableOpacity>
 
       {/* Error */}
       {error && (
         <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={20} color={colors.warning} />
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
@@ -104,92 +116,20 @@ export const BudgetScreen: React.FC = () => {
       <BudgetList
         budgets={budgets}
         loading={loading}
-        onRefresh={refreshBudgets}
+        onRefresh={refreshData}
         getBudgetStatus={getBudgetStatus}
         onBudgetPress={(budget) => {
-          const status = getBudgetStatus(budget);
-          Alert.alert(
-            `Budget ${budget.category}`,
-            `Speso: ${status.spent.toFixed(2)}€\nLimite: ${status.limit.toFixed(2)}€\nRimanente: ${status.remaining.toFixed(2)}€`
-          );
+          // TODO: Navigate to budget details
+          console.log('Budget pressed:', budget);
         }}
       />
 
-      {/* Add Budget Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
+      {/* Quick Budget Form */}
+      <QuickBudgetForm
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Nuovo Budget</Text>
-
-            <ScrollView>
-              <Text style={styles.label}>Categoria:</Text>
-              <View style={styles.categoryContainer}>
-                {categories.map((cat) => (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[
-                      styles.chip,
-                      formData.category === cat && styles.chipSelected
-                    ]}
-                    onPress={() => setFormData({ ...formData, category: cat })}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        formData.category === cat && styles.chipTextSelected
-                      ]}
-                    >
-                      {cat}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Limite (€)"
-                value={formData.limit}
-                onChangeText={(text) => setFormData({ ...formData, limit: text })}
-                keyboardType="numeric"
-              />
-
-              <Text style={styles.label}>Periodo:</Text>
-              <View style={styles.categoryContainer}>
-                {periods.map((p) => (
-                  <TouchableOpacity
-                    key={p.value}
-                    style={[
-                      styles.chip,
-                      formData.period === p.value && styles.chipSelected
-                    ]}
-                    onPress={() => setFormData({ ...formData, period: p.value as any })}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        formData.period === p.value && styles.chipTextSelected
-                      ]}
-                    >
-                      {p.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalButtons}>
-              <Button title="Annulla" onPress={() => setModalVisible(false)} color="#999" />
-              <View style={{ width: 16 }} />
-              <Button title="Crea" onPress={handleAddBudget} />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setModalVisible(false)}
+        onSubmit={handleAddBudget}
+      />
     </SafeAreaView>
   );
 };
@@ -197,99 +137,66 @@ export const BudgetScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA'
+    backgroundColor: colors.background.primary
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8'
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
-    color: '#2C3E50'
+    color: colors.text.primary,
+    marginBottom: 4
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#7F8C8D',
-    marginTop: 4
+    color: colors.text.secondary
   },
-  addButtonContainer: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8'
-  },
-  errorContainer: {
-    backgroundColor: '#FFF3CD',
-    padding: 12,
-    margin: 16,
-    borderRadius: 8
-  },
-  errorText: {
-    color: '#856404',
-    textAlign: 'center'
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+  filterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.secondary,
     justifyContent: 'center',
-    padding: 20
+    alignItems: 'center'
   },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    maxHeight: '80%'
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: borderRadius.md,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    ...colors.shadow.md
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 20
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 16
-  },
-  label: {
+  addButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-    color: '#2C3E50',
-    marginBottom: 12
+    marginLeft: 8
   },
-  categoryContainer: {
+  errorContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 20
+    alignItems: 'center',
+    backgroundColor: colors.warning + '20',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.md,
+    gap: spacing.sm
   },
-  chip: {
-    backgroundColor: '#F5F7FA',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 8
-  },
-  chipSelected: {
-    backgroundColor: '#007AFF'
-  },
-  chipText: {
-    color: '#2C3E50',
+  errorText: {
+    flex: 1,
+    color: colors.warning,
     fontSize: 14
-  },
-  chipTextSelected: {
-    color: '#FFFFFF',
-    fontWeight: '600'
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 20
   }
 });

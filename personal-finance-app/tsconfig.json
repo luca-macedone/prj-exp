@@ -1,16 +1,7 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-native",
-    "lib": ["esnext"],
-    "target": "esnext",
-    "module": "esnext",
     "baseUrl": ".",
     "paths": {
       "@features/*": ["src/features/*"],

@@ -10,7 +10,6 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 import { Platform } from 'react-native';
-import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import SecureDatabase from '../storage/SecureDatabase';
 

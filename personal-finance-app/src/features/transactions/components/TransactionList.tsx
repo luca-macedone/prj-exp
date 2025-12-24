@@ -12,7 +12,9 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Transaction } from '../../../types';
+import { colors, spacing, borderRadius } from '../../../theme';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -49,7 +51,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   if (loading && transactions.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Caricamento transazioni...</Text>
       </View>
     );
@@ -58,10 +60,27 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   if (transactions.length === 0) {
     return (
       <View style={styles.centerContainer}>
+        <View style={styles.emptyIconContainer}>
+          <Ionicons name="wallet-outline" size={80} color={colors.text.tertiary} />
+        </View>
         <Text style={styles.emptyText}>Nessuna transazione</Text>
         <Text style={styles.emptySubtext}>
-          Aggiungi la tua prima transazione per iniziare
+          Inizia a tracciare le tue spese e{'\n'}guadagni per avere il controllo{'\n'}delle tue finanze
         </Text>
+        <View style={styles.emptyTips}>
+          <View style={styles.tipItem}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+            <Text style={styles.tipText}>Aggiungi ogni spesa giornaliera</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+            <Text style={styles.tipText}>Categorizza per capire dove spendi</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+            <Text style={styles.tipText}>Monitora i tuoi progressi</Text>
+          </View>
+        </View>
       </View>
     );
   }
@@ -105,10 +124,15 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
     currency: 'EUR'
   }).format(Math.abs(transaction.amount));
 
+  const categoryIcon = getCategoryIcon(transaction.category);
+  const categoryColor = getCategoryColor(transaction.category);
+
   return (
     <View style={styles.itemContainer}>
       <View style={styles.itemLeft}>
-        <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(transaction.category) }]} />
+        <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+          <Ionicons name={categoryIcon} size={24} color={categoryColor} />
+        </View>
         <View style={styles.itemInfo}>
           <Text style={styles.description} numberOfLines={1}>
             {transaction.description}
@@ -130,18 +154,24 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
   );
 };
 
+// Helper per icone categorie
+const getCategoryIcon = (category: string): any => {
+  const icons: Record<string, any> = {
+    'Food': 'restaurant',
+    'Transport': 'car',
+    'Shopping': 'cart',
+    'Bills': 'receipt',
+    'Entertainment': 'game-controller',
+    'Health': 'medkit',
+    'Income': 'trending-up',
+    'Other': 'ellipsis-horizontal'
+  };
+  return icons[category] || 'ellipsis-horizontal';
+};
+
 // Helper per colori categorie
 const getCategoryColor = (category: string): string => {
-  const colors: Record<string, string> = {
-    'Food': '#FF6B6B',
-    'Transport': '#4ECDC4',
-    'Shopping': '#FFD93D',
-    'Bills': '#6C5CE7',
-    'Entertainment': '#FF8787',
-    'Health': '#A8E6CF',
-    'Income': '#4CAF50',
-  };
-  return colors[category] || '#95A5A6';
+  return colors.categories[category as keyof typeof colors.categories] || colors.categories.Other;
 };
 
 const styles = StyleSheet.create({
@@ -149,51 +179,71 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: spacing.xxxl
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: spacing.md,
     fontSize: 16,
-    color: '#666'
+    color: colors.text.secondary
+  },
+  emptyIconContainer: {
+    marginBottom: spacing.xxl
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: spacing.md
   },
   emptySubtext: {
+    fontSize: 15,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: spacing.xxxl
+  },
+  emptyTips: {
+    width: '100%',
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    padding: spacing.xl
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md
+  },
+  tipText: {
+    marginLeft: spacing.md,
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center'
+    color: colors.text.primary,
+    flex: 1
   },
   listContainer: {
-    padding: 16
+    padding: spacing.lg
   },
   itemContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2
+    backgroundColor: colors.background.card,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
+    ...colors.shadow.sm
   },
   itemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1
   },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12
+  categoryIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    marginRight: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   itemInfo: {
     flex: 1
@@ -201,27 +251,27 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text.primary,
     marginBottom: 4
   },
   metadata: {
     fontSize: 13,
-    color: '#666',
+    color: colors.text.secondary,
     marginBottom: 2
   },
   merchant: {
     fontSize: 12,
-    color: '#999'
+    color: colors.text.tertiary
   },
   amount: {
     fontSize: 18,
     fontWeight: '700',
-    marginLeft: 12
+    marginLeft: spacing.md
   },
   expense: {
-    color: '#E74C3C'
+    color: colors.error
   },
   income: {
-    color: '#27AE60'
+    color: colors.success
   }
 });

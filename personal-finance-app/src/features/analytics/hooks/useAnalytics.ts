@@ -53,7 +53,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Other': '#95A5A6'
 };
 
-export const useAnalytics = (period: 'week' | 'month' | 'year' = 'month'): UseAnalyticsResult => {
+export const useAnalytics = (
+  period: 'week' | 'month' | 'year' = 'month',
+  allTransactions: Transaction[] = []
+): UseAnalyticsResult => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,10 +65,8 @@ export const useAnalytics = (period: 'week' | 'month' | 'year' = 'month'): UseAn
    * Calcola analytics per il periodo specificato
    */
   const calculateAnalytics = useCallback(async (startDate: number, endDate: number): Promise<AnalyticsData> => {
-    await SecureDatabase.initialize();
-
-    // Recupera transazioni per il periodo
-    const transactions = await SecureDatabase.getTransactionsByDateRange(startDate, endDate);
+    // Filtra transazioni per il periodo dal Context invece di caricare dal DB
+    const transactions = allTransactions.filter(t => t.date >= startDate && t.date <= endDate);
 
     // Calcola totali con precisione usando big.js
     let totalIncome = new Big(0);
@@ -120,7 +121,7 @@ export const useAnalytics = (period: 'week' | 'month' | 'year' = 'month'): UseAn
       trendData,
       topExpenses
     };
-  }, [period]);
+  }, [allTransactions, period]);
 
   /**
    * Carica analytics per il periodo corrente

@@ -1,351 +1,190 @@
 /**
- * Personal Finance App - Main Entry Point
- * Architettura local-first con privacy massima
+ * Personal Finance App - Main entry point
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  Alert,
-  StatusBar,
-  ActivityIndicator
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { enableScreens } from 'react-native-screens';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { colors } from './src/theme';
 
-// Enable screens for better performance and New Architecture compatibility
-enableScreens(true);
-import AuthService from './src/services/authentication/AuthService';
-import SecureDatabase from './src/services/storage/SecureDatabase';
-
-// Screens
+// Main Screens
+import { HomeScreen } from './src/screens/HomeScreen';
 import { TransactionsScreen } from './src/screens/TransactionsScreen';
 import { BudgetScreen } from './src/screens/BudgetScreen';
 import { AnalyticsScreen } from './src/screens/AnalyticsScreen';
 
+// Auth Screens
+import {
+  WelcomeScreen,
+  LoginScreen,
+  RegisterScreen,
+  UnlockScreen
+} from './src/screens/auth';
+
+// Services
+import SecureDatabase from './src/services/storage/SecureDatabase';
+import AuthService from './src/services/authentication/AuthService';
+import { DataProvider } from './src/context/DataContext';
+import { DeveloperMenu } from './src/components/DeveloperMenu';
+import { ThemeProvider } from 'src/context/ThemeContext';
+
 const Tab = createBottomTabNavigator();
 
+type AuthState = 'loading' | 'welcome' | 'login' | 'register' | 'unlock' | 'authenticated';
+
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [authState, setAuthState] = useState<AuthState>('loading');
 
   useEffect(() => {
-    checkAuthStatus();
+    initializeApp();
   }, []);
 
-  const checkAuthStatus = async () => {
+  const initializeApp = async () => {
     try {
-      const registered = await AuthService.isUserRegistered();
-      setIsRegistered(registered);
+      // Initialize database
+      await SecureDatabase.initialize();
 
-      if (registered) {
-        const hasSession = await AuthService.hasActiveSession();
-        setIsAuthenticated(hasSession);
+      // Check if user is registered
+      const isRegistered = await AuthService.isUserRegistered();
 
-        // Inizializza database e categorie
-        if (hasSession) {
-          await SecureDatabase.initialize();
-          await SecureDatabase.initializeDefaultCategories();
-        }
-      }
-    } catch (error) {
-      console.error('Error checking auth status:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async () => {
-    try {
-      const result = await AuthService.registerUser(
-        'demo@financeapp.com',
-        'SecurePassword123!'
-      );
-
-      if (result.success) {
-        // Setup PIN opzionale
-        await AuthService.setPIN('1234');
-
-        setIsRegistered(true);
-        setIsAuthenticated(true);
-
-        // Inizializza database
-        await SecureDatabase.initialize();
-        await SecureDatabase.initializeDefaultCategories();
-
-        Alert.alert(
-          'Benvenuto! 🎉',
-          'Account creato con successo!\n\nDemo PIN: 1234\n\nI tuoi dati sono cifrati e salvati solo sul dispositivo.'
-        );
+      if (isRegistered) {
+        // User exists, show unlock screen
+        setAuthState('unlock');
       } else {
-        Alert.alert('Errore', result.error || 'Registrazione fallita');
+        // New user, show welcome screen
+        setAuthState('welcome');
       }
     } catch (error) {
-      Alert.alert('Errore', 'Errore durante la registrazione');
+      console.error('Failed to initialize app:', error);
+      setAuthState('welcome'); // Fallback to welcome
     }
   };
 
-  const handleBiometricUnlock = async () => {
-    try {
-      const result = await AuthService.unlockWithBiometrics();
-
-      if (result.success) {
-        setIsAuthenticated(true);
-        await SecureDatabase.initialize();
-      } else {
-        // Fallback su PIN
-        Alert.prompt(
-          'Inserisci PIN',
-          'Biometria non disponibile. Usa il PIN (demo: 1234)',
-          [
-            {
-              text: 'Annulla',
-              style: 'cancel'
-            },
-            {
-              text: 'OK',
-              onPress: async (pin) => {
-                if (pin) {
-                  const pinResult = await AuthService.verifyPIN(pin);
-                  if (pinResult.success) {
-                    setIsAuthenticated(true);
-                    await SecureDatabase.initialize();
-                  } else {
-                    Alert.alert('Errore', 'PIN errato');
-                  }
-                }
-              }
-            }
-          ],
-          'secure-text'
-        );
-      }
-    } catch (error) {
-      Alert.alert('Errore', 'Errore durante autenticazione');
-    }
+  const handleAuthSuccess = () => {
+    setAuthState('authenticated');
   };
 
-  if (loading) {
+  // Loading state
+  if (authState === 'loading') {
     return (
-      <View style={styles.centerContainer}>
+      <View style={styles.loading}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Caricamento...</Text>
       </View>
     );
   }
 
-  // Not registered - Registration screen
-  if (!isRegistered) {
+  // Authentication flow
+  if (authState !== 'authenticated') {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle="dark-content" />
-        <View style={styles.authContainer}>
-          <Text style={styles.logo}>💰</Text>
-          <Text style={styles.title}>Finance App</Text>
-          <Text style={styles.subtitle}>Privacy-First Financial Management</Text>
-
-          <View style={styles.featureList}>
-            <FeatureItem icon="🔒" text="Tutti i dati sul tuo dispositivo" />
-            <FeatureItem icon="🔐" text="Encryption hardware-backed" />
-            <FeatureItem icon="📱" text="Funziona 100% offline" />
-            <FeatureItem icon="🚀" text="Zero dati nel cloud" />
-            <FeatureItem icon="📊" text="Budget e analytics completi" />
-            <FeatureItem icon="🎨" text="Grafici e report dettagliati" />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Inizia Ora"
-              onPress={handleRegister}
-              color="#007AFF"
-            />
-          </View>
-
-          <Text style={styles.disclaimer}>
-            I tuoi dati finanziari restano sul tuo dispositivo.{'\n'}
-            Nessun dato sensibile viene mai inviato al server.{'\n'}
-            {'\n'}
-            🔐 Conformità GDPR, OWASP MASVS, PSD2
-          </Text>
-        </View>
-      </View>
+      <SafeAreaProvider>
+        {authState === 'welcome' && (
+          <WelcomeScreen
+            onLogin={() => setAuthState('login')}
+            onRegister={() => setAuthState('register')}
+          />
+        )}
+        {authState === 'login' && (
+          <LoginScreen
+            onSuccess={handleAuthSuccess}
+            onBack={() => setAuthState('welcome')}
+          />
+        )}
+        {authState === 'register' && (
+          <RegisterScreen
+            onSuccess={handleAuthSuccess}
+            onBack={() => setAuthState('welcome')}
+          />
+        )}
+        {authState === 'unlock' && (
+          <UnlockScreen onSuccess={handleAuthSuccess} />
+        )}
+      </SafeAreaProvider>
     );
   }
 
-  // Registered but not authenticated - Unlock screen
-  if (!isAuthenticated) {
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle="dark-content" />
-        <View style={styles.authContainer}>
-          <Text style={styles.logo}>🔐</Text>
-          <Text style={styles.title}>Sblocca App</Text>
-          <Text style={styles.subtitle}>
-            Usa biometria o PIN per accedere
-          </Text>
-
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Sblocca con Biometria"
-              onPress={handleBiometricUnlock}
-              color="#007AFF"
-            />
-          </View>
-
-          <Text style={styles.hintText}>
-            PIN demo: 1234
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
-  // Authenticated - Main app with navigation
+  // Main app (authenticated)
   return (
-    <NavigationContainer>
-      <StatusBar barStyle="dark-content" />
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: '#8E8E93',
-          tabBarStyle: {
-            backgroundColor: '#FFFFFF',
-            borderTopWidth: 1,
-            borderTopColor: '#E8E8E8',
-            height: 60,
-            paddingBottom: 8,
-            paddingTop: 8
-          },
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600'
-          },
-          lazy: true,
-          unmountOnBlur: false,
-          freezeOnBlur: false
-        }}
-      >
-        <Tab.Screen
-          name="Transactions"
-          component={TransactionsScreen}
-          options={{
-            tabBarLabel: 'Transazioni',
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24 }}>💳</Text>
-            )
-          }}
-        />
-        <Tab.Screen
-          name="Budget"
-          component={BudgetScreen}
-          options={{
-            tabBarLabel: 'Budget',
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24 }}>🎯</Text>
-            )
-          }}
-        />
-        <Tab.Screen
-          name="Analytics"
-          component={AnalyticsScreen}
-          options={{
-            tabBarLabel: 'Analytics',
-            tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24 }}>📊</Text>
-            )
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <DataProvider>
+          <NavigationContainer>
+            <Tab.Navigator
+              screenOptions={{
+                headerShown: false,
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.text.tertiary,
+                tabBarStyle: {
+                  backgroundColor: colors.background.secondary,
+                  borderTopColor: colors.border,
+                  borderTopWidth: 0.5,
+                  paddingBottom: 8,
+                  paddingTop: 8,
+                  height: 70,
+                  ...colors.shadow.sm
+                },
+                tabBarLabelStyle: {
+                  fontSize: 11,
+                  fontWeight: '600'
+                }
+              }}
+            >
+              <Tab.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{
+                  tabBarLabel: 'Home',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="home" size={size} color={color} />
+                  )
+                }}
+              />
+              <Tab.Screen
+                name="Transactions"
+                component={TransactionsScreen}
+                options={{
+                  tabBarLabel: 'Transazioni',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="list" size={size} color={color} />
+                  )
+                }}
+              />
+              <Tab.Screen
+                name="Budget"
+                component={BudgetScreen}
+                options={{
+                  tabBarLabel: 'Budget',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="wallet" size={size} color={color} />
+                  )
+                }}
+              />
+              <Tab.Screen
+                name="Analytics"
+                component={AnalyticsScreen}
+                options={{
+                  tabBarLabel: 'Statistiche',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="bar-chart" size={size} color={color} />
+                  )
+                }}
+              />
+            </Tab.Navigator>
+          </NavigationContainer>
+          <DeveloperMenu />
+        </DataProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 
-const FeatureItem: React.FC<{ icon: string; text: string }> = ({ icon, text }) => (
-  <View style={styles.featureItem}>
-    <Text style={styles.featureIcon}>{icon}</Text>
-    <Text style={styles.featureText}>{text}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA'
-  },
-  centerContainer: {
+  loading: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F7FA'
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#7F8C8D'
-  },
-  authContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24
-  },
-  logo: {
-    fontSize: 80,
-    marginBottom: 20
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7F8C8D',
-    marginBottom: 40,
-    textAlign: 'center'
-  },
-  featureList: {
-    width: '100%',
-    marginBottom: 40
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingHorizontal: 20
-  },
-  featureIcon: {
-    fontSize: 24,
-    marginRight: 12,
-    width: 32
-  },
-  featureText: {
-    fontSize: 16,
-    color: '#34495E',
-    flex: 1
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: 24
-  },
-  disclaimer: {
-    fontSize: 12,
-    color: '#95A5A6',
-    textAlign: 'center',
-    lineHeight: 18,
-    paddingHorizontal: 20
-  },
-  hintText: {
-    fontSize: 14,
-    color: '#95A5A6',
-    marginTop: 16,
-    textAlign: 'center'
+    backgroundColor: colors.background.primary
   }
 });

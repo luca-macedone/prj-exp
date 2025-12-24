@@ -44,18 +44,18 @@ export const importTransactionsFromCSV = (
     const parsed = Papa.parse<CSVTransaction>(csvContent, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header) => header.trim().toLowerCase()
+      transformHeader: (header: string) => header.trim().toLowerCase()
     });
 
     if (parsed.errors.length > 0) {
       result.errors.push('CSV parsing errors detected');
-      parsed.errors.forEach(err => {
+      parsed.errors.forEach((err: Papa.ParseError) => {
         result.errors.push(`Row ${err.row}: ${err.message}`);
       });
     }
 
     // Valida e processa ogni riga
-    parsed.data.forEach((row, index) => {
+    parsed.data.forEach((row: CSVTransaction, index: number) => {
       try {
         const transaction = validateAndParseRow(row, accountId, index + 1);
 

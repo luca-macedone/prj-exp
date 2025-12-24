@@ -13,6 +13,8 @@ import {
   Dimensions
 } from 'react-native';
 import { PieChart, LineChart } from 'react-native-chart-kit';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, spacing, borderRadius } from '../../../theme';
 
 interface AnalyticsDashboardProps {
   data: {
@@ -44,7 +46,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Caricamento analytics...</Text>
       </View>
     );
@@ -53,7 +55,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   if (!data) {
     return (
       <View style={styles.centerContainer}>
+        <View style={styles.emptyIconContainer}>
+          <Ionicons name="analytics-outline" size={80} color={colors.text.tertiary} />
+        </View>
         <Text style={styles.emptyText}>Nessun dato disponibile</Text>
+        <Text style={styles.emptySubtext}>
+          Aggiungi transazioni per vedere{'\\n'}le tue statistiche finanziarie
+        </Text>
       </View>
     );
   }
@@ -72,8 +80,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     name: item.category,
     population: item.amount,
     color: item.color,
-    legendFontColor: '#7F8C8D',
-    legendFontSize: 12
+    legendFontColor: colors.text.secondary,
+    legendFontSize: 13
   }));
 
   // Dati per Line Chart
@@ -82,13 +90,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     datasets: [
       {
         data: data.trendData.map(t => t.expenses),
-        color: (opacity = 1) => `rgba(231, 76, 60, ${opacity})`,
-        strokeWidth: 2
+        color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`, // colors.error
+        strokeWidth: 3
       },
       {
         data: data.trendData.map(t => t.income),
-        color: (opacity = 1) => `rgba(39, 174, 96, ${opacity})`,
-        strokeWidth: 2
+        color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`, // colors.success
+        strokeWidth: 3
       }
     ],
     legend: ['Spese', 'Entrate']
@@ -99,40 +107,45 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Summary Cards */}
       <View style={styles.summaryContainer}>
         <SummaryCard
-          title="Entrate"
+          title="Entrate totali"
           amount={data.totalIncome}
-          color="#27AE60"
-          icon="💰"
+          color={colors.success}
+          icon="trending-up"
         />
         <SummaryCard
-          title="Spese"
+          title="Spese totali"
           amount={data.totalExpenses}
-          color="#E74C3C"
-          icon="💸"
+          color={colors.error}
+          icon="trending-down"
         />
         <SummaryCard
-          title="Bilancio"
+          title="Bilancio netto"
           amount={data.balance}
-          color={data.balance >= 0 ? '#3498DB' : '#E74C3C'}
-          icon={data.balance >= 0 ? '📈' : '📉'}
+          color={data.balance >= 0 ? colors.info : colors.error}
+          icon={data.balance >= 0 ? 'checkmark-circle' : 'alert-circle'}
         />
       </View>
 
       {/* Spese per Categoria */}
       {pieData.length > 0 && (
         <View style={styles.chartSection}>
-          <Text style={styles.chartTitle}>Spese per Categoria</Text>
+          <View style={styles.chartHeader}>
+            <Ionicons name="pie-chart" size={24} color={colors.primary} />
+            <Text style={styles.chartTitle}>Spese per Categoria</Text>
+          </View>
           <PieChart
             data={pieData}
-            width={screenWidth - 32}
+            width={screenWidth - 64}
             height={220}
             chartConfig={{
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`
             }}
             accessor="population"
             backgroundColor="transparent"
+            // @ts-expect-error - paddingLeft type is incorrectly defined as string in library, but needs number at runtime
             paddingLeft={15}
             absolute
+            hasLegend={false}
           />
 
           {/* Categoria List */}
@@ -158,28 +171,50 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Trend Temporale */}
       {data.trendData.length > 0 && (
         <View style={styles.chartSection}>
-          <Text style={styles.chartTitle}>Trend Entrate vs Spese</Text>
+          <View style={styles.chartHeader}>
+            <Ionicons name="stats-chart" size={24} color={colors.primary} />
+            <Text style={styles.chartTitle}>Trend Entrate vs Spese</Text>
+          </View>
+          <View style={styles.legendContainer}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
+              <Text style={styles.legendText}>Entrate</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: colors.error }]} />
+              <Text style={styles.legendText}>Spese</Text>
+            </View>
+          </View>
           <LineChart
             data={lineData}
-            width={screenWidth - 32}
+            width={screenWidth - 64}
             height={220}
             chartConfig={{
-              backgroundColor: '#FFFFFF',
-              backgroundGradientFrom: '#FFFFFF',
-              backgroundGradientTo: '#FFFFFF',
+              backgroundColor: 'transparent',
+              backgroundGradientFrom: colors.background.card,
+              backgroundGradientTo: colors.background.card,
               decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(127, 140, 141, ${opacity})`,
+              color: (opacity = 1) => `rgba(160, 174, 192, ${opacity})`,
+              labelColor: (opacity = 1) => colors.text.secondary,
               style: {
-                borderRadius: 16
+                borderRadius: borderRadius.lg
               },
               propsForDots: {
-                r: 4,
-                strokeWidth: 2
+                r: 5,
+                strokeWidth: 2,
+                stroke: colors.background.card
+              },
+              propsForBackgroundLines: {
+                strokeDasharray: '',
+                stroke: colors.background.secondary,
+                strokeWidth: 1
               }
             }}
             bezier
             style={styles.lineChart}
+            withShadow={false}
+            withInnerLines={true}
+            withOuterLines={false}
           />
         </View>
       )}
@@ -191,7 +226,7 @@ interface SummaryCardProps {
   title: string;
   amount: number;
   color: string;
-  icon: string;
+  icon: any;
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, color, icon }) => {
@@ -205,8 +240,10 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, color, icon })
   };
 
   return (
-    <View style={[styles.summaryCard, { borderLeftColor: color }]}>
-      <Text style={styles.summaryIcon}>{icon}</Text>
+    <View style={styles.summaryCard}>
+      <View style={[styles.summaryIconContainer, { backgroundColor: color + '20' }]}>
+        <Ionicons name={icon} size={28} color={color} />
+      </View>
       <View style={styles.summaryContent}>
         <Text style={styles.summaryTitle}>{title}</Text>
         <Text style={[styles.summaryAmount, { color }]}>
@@ -220,88 +257,122 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, color, icon })
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA'
+    backgroundColor: colors.background.primary
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: spacing.xxxl
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: spacing.md,
     fontSize: 16,
-    color: '#666'
+    color: colors.text.secondary
+  },
+  emptyIconContainer: {
+    marginBottom: spacing.xxl
   },
   emptyText: {
-    fontSize: 18,
-    color: '#666'
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: spacing.md
+  },
+  emptySubtext: {
+    fontSize: 15,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22
   },
   summaryContainer: {
-    padding: 16,
-    gap: 12
+    padding: spacing.lg,
+    gap: spacing.md
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.background.card,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2
+    ...colors.shadow.md
   },
-  summaryIcon: {
-    fontSize: 32,
-    marginRight: 16
+  summaryIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.md
   },
   summaryContent: {
     flex: 1
   },
   summaryTitle: {
     fontSize: 14,
-    color: '#7F8C8D',
-    marginBottom: 4
+    fontWeight: '600',
+    color: colors.text.secondary,
+    marginBottom: 6
   },
   summaryAmount: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '700'
   },
   chartSection: {
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2
+    backgroundColor: colors.background.card,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...colors.shadow.md
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+    gap: spacing.sm
   },
   chartTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 16
+    color: colors.text.primary,
+    flex: 1
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.xl,
+    marginBottom: spacing.md
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6
+  },
+  legendText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.secondary
   },
   lineChart: {
-    marginVertical: 8,
-    borderRadius: 16
+    marginVertical: spacing.sm,
+    borderRadius: borderRadius.lg
   },
   categoryList: {
-    marginTop: 16
+    marginTop: spacing.lg
   },
   categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#ECF0F1'
+    borderBottomColor: colors.background.secondary
   },
   categoryLeft: {
     flexDirection: 'row',
@@ -309,27 +380,28 @@ const styles = StyleSheet.create({
     flex: 1
   },
   colorDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginRight: spacing.md
   },
   categoryName: {
     fontSize: 15,
-    color: '#2C3E50',
-    fontWeight: '500'
+    color: colors.text.primary,
+    fontWeight: '600'
   },
   categoryRight: {
     alignItems: 'flex-end'
   },
   categoryAmount: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 2
+    color: colors.text.primary,
+    marginBottom: 4
   },
   categoryPercentage: {
     fontSize: 13,
-    color: '#7F8C8D'
+    fontWeight: '600',
+    color: colors.text.secondary
   }
 });
