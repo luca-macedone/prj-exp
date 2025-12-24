@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Transaction } from '../../../types';
 
 interface TransactionListProps {
@@ -58,10 +59,27 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   if (transactions.length === 0) {
     return (
       <View style={styles.centerContainer}>
+        <View style={styles.emptyIconContainer}>
+          <Ionicons name="wallet-outline" size={80} color="#CBD5E0" />
+        </View>
         <Text style={styles.emptyText}>Nessuna transazione</Text>
         <Text style={styles.emptySubtext}>
-          Aggiungi la tua prima transazione per iniziare
+          Inizia a tracciare le tue spese e{'\n'}guadagni per avere il controllo{'\n'}delle tue finanze
         </Text>
+        <View style={styles.emptyTips}>
+          <View style={styles.tipItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#27AE60" />
+            <Text style={styles.tipText}>Aggiungi ogni spesa giornaliera</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#27AE60" />
+            <Text style={styles.tipText}>Categorizza per capire dove spendi</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#27AE60" />
+            <Text style={styles.tipText}>Monitora i tuoi progressi</Text>
+          </View>
+        </View>
       </View>
     );
   }
@@ -105,10 +123,15 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
     currency: 'EUR'
   }).format(Math.abs(transaction.amount));
 
+  const categoryIcon = getCategoryIcon(transaction.category);
+  const categoryColor = getCategoryColor(transaction.category);
+
   return (
     <View style={styles.itemContainer}>
       <View style={styles.itemLeft}>
-        <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(transaction.category) }]} />
+        <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+          <Ionicons name={categoryIcon} size={24} color={categoryColor} />
+        </View>
         <View style={styles.itemInfo}>
           <Text style={styles.description} numberOfLines={1}>
             {transaction.description}
@@ -130,6 +153,21 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
   );
 };
 
+// Helper per icone categorie
+const getCategoryIcon = (category: string): any => {
+  const icons: Record<string, any> = {
+    'Food': 'restaurant',
+    'Transport': 'car',
+    'Shopping': 'cart',
+    'Bills': 'receipt',
+    'Entertainment': 'game-controller',
+    'Health': 'medkit',
+    'Income': 'trending-up',
+    'Other': 'ellipsis-horizontal'
+  };
+  return icons[category] || 'ellipsis-horizontal';
+};
+
 // Helper per colori categorie
 const getCategoryColor = (category: string): string => {
   const colors: Record<string, string> = {
@@ -149,23 +187,45 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 32
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
     color: '#666'
   },
+  emptyIconContainer: {
+    marginBottom: 24
+  },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#2C3E50',
+    marginBottom: 12
   },
   emptySubtext: {
+    fontSize: 15,
+    color: '#7F8C8D',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32
+  },
+  emptyTips: {
+    width: '100%',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 20
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  tipText: {
+    marginLeft: 12,
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center'
+    color: '#2C3E50',
+    flex: 1
   },
   listContainer: {
     padding: 16
@@ -189,11 +249,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1
   },
-  categoryDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12
+  categoryIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   itemInfo: {
     flex: 1

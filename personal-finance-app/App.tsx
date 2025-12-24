@@ -7,6 +7,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 // Main Screens
 import { TransactionsScreen } from './src/screens/TransactionsScreen';
@@ -112,9 +113,13 @@ export default function App() {
               backgroundColor: '#FFFFFF',
               borderTopColor: '#E5E5EA',
               borderTopWidth: 1,
-              paddingBottom: 5,
-              paddingTop: 5,
-              height: 60
+              paddingBottom: 8,
+              paddingTop: 8,
+              height: 65
+            },
+            tabBarLabelStyle: {
+              fontSize: 12,
+              fontWeight: '600'
             }
           }}
         >
@@ -122,21 +127,30 @@ export default function App() {
             name="Transactions"
             component={TransactionsScreen}
             options={{
-              tabBarLabel: 'Transazioni'
+              tabBarLabel: 'Transazioni',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="list" size={size} color={color} />
+              )
             }}
           />
           <Tab.Screen
             name="Budget"
             component={BudgetScreen}
             options={{
-              tabBarLabel: 'Budget'
+              tabBarLabel: 'Budget',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="wallet" size={size} color={color} />
+              )
             }}
           />
           <Tab.Screen
             name="Analytics"
             component={AnalyticsScreen}
             options={{
-              tabBarLabel: 'Analytics'
+              tabBarLabel: 'Analytics',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="stats-chart" size={size} color={color} />
+              )
             }}
           />
         </Tab.Navigator>

@@ -16,6 +16,7 @@ import {
   ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { BudgetList } from '../features/budget';
 import { useBudgets } from '../features/budget/hooks/useBudgets';
 
@@ -85,13 +86,13 @@ export const BudgetScreen: React.FC = () => {
       </View>
 
       {/* Add Button */}
-      <View style={styles.addButtonContainer}>
-        <Button
-          title="+ Nuovo Budget"
-          onPress={() => setModalVisible(true)}
-          color="#007AFF"
-        />
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Ionicons name="add-circle" size={24} color="#FFFFFF" />
+        <Text style={styles.addButtonText}>Nuovo Budget</Text>
+      </TouchableOpacity>
 
       {/* Error */}
       {error && (
@@ -215,11 +216,26 @@ const styles = StyleSheet.create({
     color: '#7F8C8D',
     marginTop: 4
   },
-  addButtonContainer: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8'
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    margin: 16,
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8
   },
   errorContainer: {
     backgroundColor: '#FFF3CD',

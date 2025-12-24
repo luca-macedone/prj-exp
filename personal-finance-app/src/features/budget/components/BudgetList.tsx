@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Budget } from '../../../types';
 import { BudgetStatus } from '../hooks/useBudgets';
 
@@ -62,10 +63,27 @@ export const BudgetList: React.FC<BudgetListProps> = ({
   if (budgets.length === 0) {
     return (
       <View style={styles.centerContainer}>
+        <View style={styles.emptyIconContainer}>
+          <Ionicons name="wallet-outline" size={80} color="#CBD5E0" />
+        </View>
         <Text style={styles.emptyText}>Nessun budget configurato</Text>
         <Text style={styles.emptySubtext}>
-          Crea un budget per tenere sotto controllo le tue spese
+          Imposta limiti di spesa per categoria{'\n'}e monitora i tuoi progressi{'\n'}verso i tuoi obiettivi finanziari
         </Text>
+        <View style={styles.emptyTips}>
+          <View style={styles.tipItem}>
+            <Ionicons name="trophy" size={20} color="#F39C12" />
+            <Text style={styles.tipText}>Raggiungi i tuoi obiettivi di risparmio</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="shield-checkmark" size={20} color="#3498DB" />
+            <Text style={styles.tipText}>Evita spese eccessive</Text>
+          </View>
+          <View style={styles.tipItem}>
+            <Ionicons name="trending-up" size={20} color="#27AE60" />
+            <Text style={styles.tipText}>Migliora le tue abitudini finanziarie</Text>
+          </View>
+        </View>
       </View>
     );
   }
@@ -115,10 +133,43 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, status }) => {
     return labels[period] || period;
   };
 
+  const getCategoryIcon = (category: string): any => {
+    const icons: Record<string, any> = {
+      'Food': 'restaurant',
+      'Transport': 'car',
+      'Shopping': 'cart',
+      'Bills': 'receipt',
+      'Entertainment': 'game-controller',
+      'Health': 'medkit',
+      'Other': 'ellipsis-horizontal'
+    };
+    return icons[category] || 'ellipsis-horizontal';
+  };
+
+  const getCategoryColor = (category: string): string => {
+    const colors: Record<string, string> = {
+      'Food': '#FF6B6B',
+      'Transport': '#4ECDC4',
+      'Shopping': '#FFD93D',
+      'Bills': '#6C5CE7',
+      'Entertainment': '#FF8787',
+      'Health': '#A8E6CF',
+    };
+    return colors[category] || '#95A5A6';
+  };
+
+  const categoryIcon = getCategoryIcon(budget.category);
+  const categoryColor = getCategoryColor(budget.category);
+
   return (
     <View style={styles.card}>
       {/* Header */}
       <View style={styles.cardHeader}>
+        <View style={styles.categoryIconWrapper}>
+          <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+            <Ionicons name={categoryIcon} size={28} color={categoryColor} />
+          </View>
+        </View>
         <View style={styles.categoryInfo}>
           <Text style={styles.categoryName}>{budget.category}</Text>
           <Text style={styles.periodLabel}>{getPeriodLabel(budget.period)}</Text>
@@ -179,23 +230,45 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 32
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
     color: '#666'
   },
+  emptyIconContainer: {
+    marginBottom: 24
+  },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#2C3E50',
+    marginBottom: 12
   },
   emptySubtext: {
+    fontSize: 15,
+    color: '#7F8C8D',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32
+  },
+  emptyTips: {
+    width: '100%',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 20
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  tipText: {
+    marginLeft: 12,
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center'
+    color: '#2C3E50',
+    flex: 1
   },
   listContainer: {
     padding: 16
@@ -213,8 +286,18 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  categoryIconWrapper: {
+    marginRight: 12
+  },
+  categoryIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   categoryInfo: {
     flex: 1
