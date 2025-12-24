@@ -1,55 +1,155 @@
 /**
- * Personal Finance App - Testing Navigation WITHOUT SafeAreaProvider
+ * Personal Finance App - Main entry point
  */
 
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Main Screens
+import { TransactionsScreen } from './src/screens/TransactionsScreen';
+import { BudgetScreen } from './src/screens/BudgetScreen';
+import { AnalyticsScreen } from './src/screens/AnalyticsScreen';
+
+// Auth Screens
+import {
+  WelcomeScreen,
+  LoginScreen,
+  RegisterScreen,
+  UnlockScreen
+} from './src/screens/auth';
+
+// Services
+import SecureDatabase from './src/services/storage/SecureDatabase';
+import AuthService from './src/services/authentication/AuthService';
 
 const Tab = createBottomTabNavigator();
 
-// Dummy screens
-function Screen1() {
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.text}>Screen 1</Text>
-    </View>
-  );
-}
-
-function Screen2() {
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.text}>Screen 2</Text>
-    </View>
-  );
-}
+type AuthState = 'loading' | 'welcome' | 'login' | 'register' | 'unlock' | 'authenticated';
 
 export default function App() {
+  const [authState, setAuthState] = useState<AuthState>('loading');
+
+  useEffect(() => {
+    initializeApp();
+  }, []);
+
+  const initializeApp = async () => {
+    try {
+      // Initialize database
+      await SecureDatabase.initialize();
+
+      // Check if user is registered
+      const isRegistered = await AuthService.isUserRegistered();
+
+      if (isRegistered) {
+        // User exists, show unlock screen
+        setAuthState('unlock');
+      } else {
+        // New user, show welcome screen
+        setAuthState('welcome');
+      }
+    } catch (error) {
+      console.error('Failed to initialize app:', error);
+      setAuthState('welcome'); // Fallback to welcome
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setAuthState('authenticated');
+  };
+
+  // Loading state
+  if (authState === 'loading') {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  // Authentication flow
+  if (authState !== 'authenticated') {
+    return (
+      <SafeAreaProvider>
+        {authState === 'welcome' && (
+          <WelcomeScreen
+            onLogin={() => setAuthState('login')}
+            onRegister={() => setAuthState('register')}
+          />
+        )}
+        {authState === 'login' && (
+          <LoginScreen
+            onSuccess={handleAuthSuccess}
+            onBack={() => setAuthState('welcome')}
+          />
+        )}
+        {authState === 'register' && (
+          <RegisterScreen
+            onSuccess={handleAuthSuccess}
+            onBack={() => setAuthState('welcome')}
+          />
+        )}
+        {authState === 'unlock' && (
+          <UnlockScreen onSuccess={handleAuthSuccess} />
+        )}
+      </SafeAreaProvider>
+    );
+  }
+
+  // Main app (authenticated)
   return (
-    <NavigationContainer>
-      <Tab.Navigator>
-        <Tab.Screen name="Screen1" component={Screen1} />
-        <Tab.Screen name="Screen2" component={Screen2} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: '#007AFF',
+            tabBarInactiveTintColor: '#8E8E93',
+            tabBarStyle: {
+              backgroundColor: '#FFFFFF',
+              borderTopColor: '#E5E5EA',
+              borderTopWidth: 1,
+              paddingBottom: 5,
+              paddingTop: 5,
+              height: 60
+            }
+          }}
+        >
+          <Tab.Screen
+            name="Transactions"
+            component={TransactionsScreen}
+            options={{
+              tabBarLabel: 'Transazioni'
+            }}
+          />
+          <Tab.Screen
+            name="Budget"
+            component={BudgetScreen}
+            options={{
+              tabBarLabel: 'Budget'
+            }}
+          />
+          <Tab.Screen
+            name="Analytics"
+            component={AnalyticsScreen}
+            options={{
+              tabBarLabel: 'Analytics'
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  loading: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5F7FA'
-  },
-  text: {
-    fontSize: 24,
-    color: '#2C3E50'
   }
 });
