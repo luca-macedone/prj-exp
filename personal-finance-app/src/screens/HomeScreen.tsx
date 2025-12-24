@@ -16,11 +16,15 @@ import { colors, spacing, borderRadius, typography } from '../theme';
 import { useData } from '../context/DataContext';
 import { useNavigation } from '@react-navigation/native';
 import { QuickTransactionForm } from '../components/QuickTransactionForm';
+import { SettingsScreen } from './SettingsScreen';
+import { NotificationsScreen } from './NotificationsScreen';
 
 export const HomeScreen: React.FC = () => {
   const { transactions, addTransaction } = useData();
   const navigation = useNavigation();
   const [quickAddVisible, setQuickAddVisible] = React.useState(false);
+  const [settingsVisible, setSettingsVisible] = React.useState(false);
+  const [notificationsVisible, setNotificationsVisible] = React.useState(false);
 
   // Calcola il saldo totale
   const totalBalance = transactions.reduce((sum, t) => sum + t.amount, 0);
@@ -73,8 +77,11 @@ export const HomeScreen: React.FC = () => {
   };
 
   const handleMore = () => {
-    // TODO: Implementare menu impostazioni
-    console.log('Menu impostazioni non ancora implementato');
+    setSettingsVisible(true);
+  };
+
+  const handleNotifications = () => {
+    setNotificationsVisible(true);
   };
 
   const handleViewAllTransactions = () => {
@@ -96,10 +103,7 @@ export const HomeScreen: React.FC = () => {
             </View>
           </View>
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="sunny-outline" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={handleNotifications}>
               <Ionicons name="notifications-outline" size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
@@ -257,6 +261,20 @@ export const HomeScreen: React.FC = () => {
         onClose={() => setQuickAddVisible(false)}
         onSubmit={handleAddTransaction}
       />
+
+      {/* Settings Modal */}
+      {settingsVisible && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <SettingsScreen onClose={() => setSettingsVisible(false)} />
+        </View>
+      )}
+
+      {/* Notifications Modal */}
+      {notificationsVisible && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <NotificationsScreen onClose={() => setNotificationsVisible(false)} />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
