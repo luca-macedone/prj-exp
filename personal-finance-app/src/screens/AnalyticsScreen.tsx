@@ -16,10 +16,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { AnalyticsDashboard } from '../features/analytics';
 import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
 import { colors, spacing, borderRadius } from '../theme';
+import { useData } from '../context/DataContext';
 
 export const AnalyticsScreen: React.FC = () => {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('week');
-  const { data, loading, error, refreshAnalytics } = useAnalytics(period);
+  const { transactions, loading: dataLoading } = useData();
+  const { data, loading, error } = useAnalytics(period, transactions);
 
   const periods = [
     { value: 'week' as const, label: 'Settimana', icon: 'calendar' },

@@ -27,6 +27,8 @@ import {
 // Services
 import SecureDatabase from './src/services/storage/SecureDatabase';
 import AuthService from './src/services/authentication/AuthService';
+import { DataProvider } from './src/context/DataContext';
+import { DeveloperMenu } from './src/components/DeveloperMenu';
 
 const Tab = createBottomTabNavigator();
 
@@ -105,8 +107,9 @@ export default function App() {
   // Main app (authenticated)
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Tab.Navigator
+      <DataProvider>
+        <NavigationContainer>
+          <Tab.Navigator
           screenOptions={{
             headerShown: false,
             tabBarActiveTintColor: colors.primary,
@@ -168,6 +171,8 @@ export default function App() {
           />
         </Tab.Navigator>
       </NavigationContainer>
+      <DeveloperMenu />
+      </DataProvider>
     </SafeAreaProvider>
   );
 }

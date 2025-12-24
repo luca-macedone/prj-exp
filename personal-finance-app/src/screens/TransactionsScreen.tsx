@@ -13,18 +13,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { TransactionList } from '../features/transactions';
-import { useTransactions } from '../features/transactions/hooks/useTransactions';
 import { QuickTransactionForm } from '../components/QuickTransactionForm';
 import { colors, spacing, borderRadius } from '../theme';
+import { useData } from '../context/DataContext';
 
 export const TransactionsScreen: React.FC = () => {
   const {
     transactions,
     loading,
-    error,
     addTransaction,
-    refreshTransactions
-  } = useTransactions();
+    refreshData
+  } = useData();
+
+  const [error, setError] = useState<string | null>(null);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -88,7 +89,7 @@ export const TransactionsScreen: React.FC = () => {
       <TransactionList
         transactions={transactions}
         loading={loading}
-        onRefresh={refreshTransactions}
+        onRefresh={refreshData}
         onTransactionPress={(transaction) => {
           // TODO: Navigate to transaction details
           console.log('Transaction pressed:', transaction);

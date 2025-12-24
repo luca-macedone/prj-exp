@@ -455,6 +455,26 @@ class SecureDatabase {
   }
 
   /**
+   * Reset database - Cancella i dati ma mantiene le tabelle e le categorie di default
+   * Utile per sviluppatori durante il testing
+   */
+  async resetDatabase(): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    await this.db.execAsync(`
+      DELETE FROM transactions;
+      DELETE FROM accounts;
+      DELETE FROM budgets;
+      DELETE FROM categories;
+    `);
+
+    // Ricrea categorie di default
+    await this.initializeDefaultCategories();
+
+    console.log('Database reset completed');
+  }
+
+  /**
    * Mappers per convertire row del database in oggetti tipizzati
    */
   private mapRowToTransaction(row: any): Transaction {

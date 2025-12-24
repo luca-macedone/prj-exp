@@ -13,10 +13,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography } from '../theme';
-import { useTransactions } from '../features/transactions/hooks/useTransactions';
+import { useData } from '../context/DataContext';
+import { useNavigation } from '@react-navigation/native';
+import { QuickTransactionForm } from '../components/QuickTransactionForm';
 
 export const HomeScreen: React.FC = () => {
-  const { transactions } = useTransactions();
+  const { transactions, addTransaction } = useData();
+  const navigation = useNavigation();
+  const [quickAddVisible, setQuickAddVisible] = React.useState(false);
 
   // Calcola il saldo totale
   const totalBalance = transactions.reduce((sum, t) => sum + t.amount, 0);
@@ -34,6 +38,47 @@ export const HomeScreen: React.FC = () => {
       currency: 'EUR',
       minimumFractionDigits: 2
     }).format(amount);
+  };
+
+  // Handlers per azioni rapide
+  const handleQuickAdd = () => {
+    setQuickAddVisible(true);
+  };
+
+  const handleAddTransaction = async (data: {
+    amount: number;
+    description: string;
+    category: string;
+  }) => {
+    const result = await addTransaction({
+      amount: data.amount,
+      description: data.description,
+      category: data.category,
+      date: Date.now(),
+      accountId: 'default-account'
+    });
+
+    if (result) {
+      setQuickAddVisible(false);
+    }
+  };
+
+  const handleTransfer = () => {
+    // TODO: Implementare trasferimento tra conti
+    console.log('Trasferimento non ancora implementato');
+  };
+
+  const handleAnalyze = () => {
+    (navigation as any).navigate('Analytics');
+  };
+
+  const handleMore = () => {
+    // TODO: Implementare menu impostazioni
+    console.log('Menu impostazioni non ancora implementato');
+  };
+
+  const handleViewAllTransactions = () => {
+    (navigation as any).navigate('Transactions');
   };
 
   return (
@@ -144,28 +189,28 @@ export const HomeScreen: React.FC = () => {
           </View>
 
           <View style={styles.actionsGrid}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={handleQuickAdd}>
               <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
                 <Ionicons name="add" size={24} color={colors.primary} />
               </View>
               <Text style={styles.actionLabel}>Aggiungi</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={handleTransfer}>
               <View style={[styles.actionIcon, { backgroundColor: colors.warning + '20' }]}>
                 <Ionicons name="swap-horizontal" size={24} color={colors.warning} />
               </View>
               <Text style={styles.actionLabel}>Trasferisci</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={handleAnalyze}>
               <View style={[styles.actionIcon, { backgroundColor: colors.success + '20' }]}>
                 <Ionicons name="stats-chart" size={24} color={colors.success} />
               </View>
               <Text style={styles.actionLabel}>Analizza</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={handleMore}>
               <View style={[styles.actionIcon, { backgroundColor: colors.info + '20' }]}>
                 <Ionicons name="settings" size={24} color={colors.info} />
               </View>
@@ -178,7 +223,7 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.recentSection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Transazioni Recenti</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleViewAllTransactions}>
               <Text style={styles.seeAll}>Vedi tutte</Text>
             </TouchableOpacity>
           </View>
@@ -205,6 +250,13 @@ export const HomeScreen: React.FC = () => {
           ))}
         </View>
       </ScrollView>
+
+      {/* Quick Transaction Form */}
+      <QuickTransactionForm
+        visible={quickAddVisible}
+        onClose={() => setQuickAddVisible(false)}
+        onSubmit={handleAddTransaction}
+      />
     </SafeAreaView>
   );
 };

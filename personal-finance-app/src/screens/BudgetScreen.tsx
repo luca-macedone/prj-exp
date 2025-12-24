@@ -13,21 +13,51 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BudgetList } from '../features/budget';
-import { useBudgets } from '../features/budget/hooks/useBudgets';
 import { QuickBudgetForm } from '../components/QuickBudgetForm';
 import { colors, spacing, borderRadius } from '../theme';
+import { useData } from '../context/DataContext';
 
 export const BudgetScreen: React.FC = () => {
   const {
     budgets,
     loading,
-    error,
     addBudget,
-    refreshBudgets,
-    getBudgetStatus
-  } = useBudgets();
+    refreshData,
+    transactions
+  } = useData();
 
+  const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Calcola lo stato di un budget
+  const getBudgetStatus = (budget: any) => {
+    if (!budget) {
+      return {
+        spent: 0,
+        limit: 0,
+        remaining: 0,
+        percentage: 0,
+        isOverBudget: false,
+        isWarning: false
+      };
+    }
+
+    const spent = budget.spent || 0;
+    const limit = budget.limit || 0;
+    const remaining = limit - spent;
+    const percentage = limit > 0 ? (spent / limit) * 100 : 0;
+    const isOverBudget = percentage >= 100;
+    const isWarning = percentage >= 80 && !isOverBudget;
+
+    return {
+      spent,
+      limit,
+      remaining,
+      percentage,
+      isOverBudget,
+      isWarning
+    };
+  };
 
   const handleAddBudget = async (data: {
     category: string;
@@ -86,7 +116,7 @@ export const BudgetScreen: React.FC = () => {
       <BudgetList
         budgets={budgets}
         loading={loading}
-        onRefresh={refreshBudgets}
+        onRefresh={refreshData}
         getBudgetStatus={getBudgetStatus}
         onBudgetPress={(budget) => {
           // TODO: Navigate to budget details
