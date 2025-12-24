@@ -29,6 +29,7 @@ import SecureDatabase from './src/services/storage/SecureDatabase';
 import AuthService from './src/services/authentication/AuthService';
 import { DataProvider } from './src/context/DataContext';
 import { DeveloperMenu } from './src/components/DeveloperMenu';
+import { ThemeProvider } from 'src/context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -107,72 +108,74 @@ export default function App() {
   // Main app (authenticated)
   return (
     <SafeAreaProvider>
-      <DataProvider>
-        <NavigationContainer>
-          <Tab.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarActiveTintColor: colors.primary,
-            tabBarInactiveTintColor: colors.text.tertiary,
-            tabBarStyle: {
-              backgroundColor: colors.background.secondary,
-              borderTopColor: colors.border,
-              borderTopWidth: 0.5,
-              paddingBottom: 8,
-              paddingTop: 8,
-              height: 70,
-              ...colors.shadow.sm
-            },
-            tabBarLabelStyle: {
-              fontSize: 11,
-              fontWeight: '600'
-            }
-          }}
-        >
-          <Tab.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{
-              tabBarLabel: 'Home',
-              tabBarIcon: ({ color, size }) => (
-                <Ionicons name="home" size={size} color={color} />
-              )
-            }}
-          />
-          <Tab.Screen
-            name="Transactions"
-            component={TransactionsScreen}
-            options={{
-              tabBarLabel: 'Transazioni',
-              tabBarIcon: ({ color, size }) => (
-                <Ionicons name="list" size={size} color={color} />
-              )
-            }}
-          />
-          <Tab.Screen
-            name="Budget"
-            component={BudgetScreen}
-            options={{
-              tabBarLabel: 'Budget',
-              tabBarIcon: ({ color, size }) => (
-                <Ionicons name="wallet" size={size} color={color} />
-              )
-            }}
-          />
-          <Tab.Screen
-            name="Analytics"
-            component={AnalyticsScreen}
-            options={{
-              tabBarLabel: 'Statistiche',
-              tabBarIcon: ({ color, size }) => (
-                <Ionicons name="bar-chart" size={size} color={color} />
-              )
-            }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
-      <DeveloperMenu />
-      </DataProvider>
+      <ThemeProvider>
+        <DataProvider>
+          <NavigationContainer>
+            <Tab.Navigator
+              screenOptions={{
+                headerShown: false,
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.text.tertiary,
+                tabBarStyle: {
+                  backgroundColor: colors.background.secondary,
+                  borderTopColor: colors.border,
+                  borderTopWidth: 0.5,
+                  paddingBottom: 8,
+                  paddingTop: 8,
+                  height: 70,
+                  ...colors.shadow.sm
+                },
+                tabBarLabelStyle: {
+                  fontSize: 11,
+                  fontWeight: '600'
+                }
+              }}
+            >
+              <Tab.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{
+                  tabBarLabel: 'Home',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="home" size={size} color={color} />
+                  )
+                }}
+              />
+              <Tab.Screen
+                name="Transactions"
+                component={TransactionsScreen}
+                options={{
+                  tabBarLabel: 'Transazioni',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="list" size={size} color={color} />
+                  )
+                }}
+              />
+              <Tab.Screen
+                name="Budget"
+                component={BudgetScreen}
+                options={{
+                  tabBarLabel: 'Budget',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="wallet" size={size} color={color} />
+                  )
+                }}
+              />
+              <Tab.Screen
+                name="Analytics"
+                component={AnalyticsScreen}
+                options={{
+                  tabBarLabel: 'Statistiche',
+                  tabBarIcon: ({ color, size }) => (
+                    <Ionicons name="bar-chart" size={size} color={color} />
+                  )
+                }}
+              />
+            </Tab.Navigator>
+          </NavigationContainer>
+          <DeveloperMenu />
+        </DataProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
