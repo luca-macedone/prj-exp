@@ -8,30 +8,38 @@ import {
   View,
   StyleSheet,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { AnalyticsDashboard } from '../features/analytics';
 import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
+import { colors, spacing, borderRadius } from '../theme';
 
 export const AnalyticsScreen: React.FC = () => {
-  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('week');
   const { data, loading, error, refreshAnalytics } = useAnalytics(period);
 
   const periods = [
-    { value: 'week' as const, label: 'Settimana' },
-    { value: 'month' as const, label: 'Mese' },
-    { value: 'year' as const, label: 'Anno' }
+    { value: 'week' as const, label: 'Settimana', icon: 'calendar' },
+    { value: 'month' as const, label: 'Mese', icon: 'calendar-outline' },
+    { value: 'year' as const, label: 'Anno', icon: 'calendar-number' }
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Analytics</Text>
-        <Text style={styles.headerSubtitle}>
-          Panoramica delle tue finanze
-        </Text>
+        <View>
+          <Text style={styles.headerTitle}>Analytics</Text>
+          <Text style={styles.headerSubtitle}>
+            Panoramica delle tue finanze
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.exportButton}>
+          <Ionicons name="download-outline" size={20} color={colors.text.secondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Period Selector */}
@@ -45,6 +53,11 @@ export const AnalyticsScreen: React.FC = () => {
             ]}
             onPress={() => setPeriod(p.value)}
           >
+            <Ionicons
+              name={p.icon as any}
+              size={18}
+              color={period === p.value ? colors.primary : colors.text.secondary}
+            />
             <Text
               style={[
                 styles.periodButtonText,
@@ -60,6 +73,7 @@ export const AnalyticsScreen: React.FC = () => {
       {/* Error */}
       {error && (
         <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle" size={20} color={colors.warning} />
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
@@ -73,60 +87,78 @@ export const AnalyticsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA'
+    backgroundColor: colors.background.primary
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8'
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
-    color: '#2C3E50'
+    color: colors.text.primary,
+    marginBottom: 4
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#7F8C8D',
-    marginTop: 4
+    color: colors.text.secondary
+  },
+  exportButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   periodSelector: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 8,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E8E8E8'
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+    gap: spacing.sm
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: '#F5F7FA',
-    alignItems: 'center'
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.secondary,
+    borderWidth: 1.5,
+    borderColor: 'transparent'
   },
   periodButtonSelected: {
-    backgroundColor: '#007AFF'
+    backgroundColor: colors.primary + '20',
+    borderColor: colors.primary
   },
   periodButtonText: {
     fontSize: 14,
-    color: '#2C3E50',
-    fontWeight: '500'
+    fontWeight: '600',
+    color: colors.text.secondary
   },
   periodButtonTextSelected: {
-    color: '#FFFFFF',
-    fontWeight: '700'
+    color: colors.primary
   },
   errorContainer: {
-    backgroundColor: '#FFF3CD',
-    padding: 12,
-    margin: 16,
-    borderRadius: 8
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.warning + '20',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    borderRadius: borderRadius.md,
+    gap: spacing.sm
   },
   errorText: {
-    color: '#856404',
-    textAlign: 'center'
+    flex: 1,
+    color: colors.warning,
+    fontSize: 14
   }
 });
