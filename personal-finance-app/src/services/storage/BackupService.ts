@@ -7,7 +7,7 @@
  */
 
 import * as Crypto from 'expo-crypto';
-import * as FileSystem from 'expo-file-system';
+import { File, Directory, Paths } from 'expo-file-system';
 import { Platform } from 'react-native';
 import SecureDatabase from './SecureDatabase';
 import { Transaction, Account, Budget, Category, EncryptedBackup } from '../../types';
@@ -115,13 +115,10 @@ class BackupService {
       */
 
       // Per demo, salva localmente
-      const backupPath = `${FileSystem.documentDirectory}backup_${encryptedBackup.timestamp}.json`;
-      await FileSystem.writeAsStringAsync(
-        backupPath,
-        JSON.stringify(encryptedBackup)
-      );
+      const backupFile = new File(Paths.document, `backup_${encryptedBackup.timestamp}.json`);
+      await backupFile.write(JSON.stringify(encryptedBackup));
 
-      console.log(`Backup saved locally at: ${backupPath}`);
+      console.log(`Backup saved locally at: ${backupFile.uri}`);
       return true;
     } catch (error) {
       console.error('Failed to upload backup:', error);
@@ -146,18 +143,20 @@ class BackupService {
       */
 
       // Per demo, legge dal file locale più recente
-      const backupDir = FileSystem.documentDirectory;
-      const files = await FileSystem.readDirectoryAsync(backupDir!);
-      const backupFiles = files.filter((f: string) => f.startsWith('backup_'));
+      const backupDir = new Directory(Paths.document);
+      const files = await backupDir.list();
+      const backupFiles = files
+        .filter((item) => item instanceof File && item.name.startsWith('backup_'))
+        .map((item) => item.name);
 
       if (backupFiles.length === 0) {
         return null;
       }
 
       // Trova il backup più recente
-      const latestBackup = backupFiles.sort().reverse()[0];
-      const backupPath = `${backupDir}${latestBackup}`;
-      const content = await FileSystem.readAsStringAsync(backupPath);
+      const latestBackupName = backupFiles.sort().reverse()[0];
+      const backupFile = new File(Paths.document, latestBackupName);
+      const content = await backupFile.text();
 
       return JSON.parse(content);
     } catch (error) {
