@@ -8,8 +8,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from './src/theme';
 
 // Main Screens
+import { HomeScreen } from './src/screens/HomeScreen';
 import { TransactionsScreen } from './src/screens/TransactionsScreen';
 import { BudgetScreen } from './src/screens/BudgetScreen';
 import { AnalyticsScreen } from './src/screens/AnalyticsScreen';
@@ -107,22 +109,33 @@ export default function App() {
         <Tab.Navigator
           screenOptions={{
             headerShown: false,
-            tabBarActiveTintColor: '#007AFF',
-            tabBarInactiveTintColor: '#8E8E93',
+            tabBarActiveTintColor: colors.primary,
+            tabBarInactiveTintColor: colors.text.tertiary,
             tabBarStyle: {
-              backgroundColor: '#FFFFFF',
-              borderTopColor: '#E5E5EA',
-              borderTopWidth: 1,
+              backgroundColor: colors.background.secondary,
+              borderTopColor: colors.border,
+              borderTopWidth: 0.5,
               paddingBottom: 8,
               paddingTop: 8,
-              height: 65
+              height: 70,
+              ...colors.shadow.sm
             },
             tabBarLabelStyle: {
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: '600'
             }
           }}
         >
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              tabBarLabel: 'Home',
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="home" size={size} color={color} />
+              )
+            }}
+          />
           <Tab.Screen
             name="Transactions"
             component={TransactionsScreen}
@@ -147,9 +160,9 @@ export default function App() {
             name="Analytics"
             component={AnalyticsScreen}
             options={{
-              tabBarLabel: 'Analytics',
+              tabBarLabel: 'Statistiche',
               tabBarIcon: ({ color, size }) => (
-                <Ionicons name="stats-chart" size={size} color={color} />
+                <Ionicons name="bar-chart" size={size} color={color} />
               )
             }}
           />
@@ -164,6 +177,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F7FA'
+    backgroundColor: colors.background.primary
   }
 });
