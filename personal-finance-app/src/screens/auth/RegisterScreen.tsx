@@ -26,11 +26,13 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     // Validation
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !pin || !confirmPin) {
       Alert.alert('Errore', 'Compila tutti i campi');
       return;
     }
@@ -45,16 +47,37 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       return;
     }
 
+    if (pin.length < 4 || pin.length > 6) {
+      Alert.alert('Errore', 'Il PIN deve essere di 4-6 cifre');
+      return;
+    }
+
+    if (!/^\d+$/.test(pin)) {
+      Alert.alert('Errore', 'Il PIN deve contenere solo numeri');
+      return;
+    }
+
+    if (pin !== confirmPin) {
+      Alert.alert('Errore', 'I PIN non coincidono');
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await AuthService.registerUser(email, password);
 
       if (result.success) {
-        Alert.alert(
-          'Registrazione completata',
-          'Account creato con successo!',
-          [{ text: 'OK', onPress: onSuccess }]
-        );
+        // Imposta il PIN
+        const pinSet = await AuthService.setPIN(pin);
+        if (pinSet) {
+          Alert.alert(
+            'Registrazione completata',
+            'Account creato con successo!',
+            [{ text: 'OK', onPress: onSuccess }]
+          );
+        } else {
+          Alert.alert('Errore', 'Impossibile impostare il PIN');
+        }
       } else {
         Alert.alert('Errore', result.error || 'Registrazione fallita');
       }
@@ -102,6 +125,30 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <TextInput
+            className="bg-white border border-[#E5E5EA] rounded-xl px-4 py-3.5 text-base mb-4"
+            placeholder="PIN (4-6 cifre)"
+            value={pin}
+            onChangeText={setPin}
+            keyboardType="numeric"
+            secureTextEntry
+            maxLength={6}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <TextInput
+            className="bg-white border border-[#E5E5EA] rounded-xl px-4 py-3.5 text-base mb-4"
+            placeholder="Conferma PIN"
+            value={confirmPin}
+            onChangeText={setConfirmPin}
+            keyboardType="numeric"
+            secureTextEntry
+            maxLength={6}
             autoCapitalize="none"
             autoCorrect={false}
           />

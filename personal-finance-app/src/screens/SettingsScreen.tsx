@@ -9,8 +9,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
+import AuthService from '../services/authentication/AuthService';
 
-export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+interface SettingsScreenProps {
+  onClose: () => void;
+  onLogout?: () => void;
+}
+
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose, onLogout }) => {
   const { mode, setMode, colorScheme } = useTheme();
   const { resetDatabase, seedDatabase } = useData();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -53,6 +59,42 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
                 type: 'error',
                 text1: 'Errore',
                 text2: 'Impossibile resettare i dati',
+                position: 'bottom',
+              });
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Sei sicuro di voler uscire dall\'account?',
+      [
+        { text: 'Annulla', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AuthService.logout();
+              onClose();
+              if (onLogout) {
+                onLogout();
+              }
+              Toast.show({
+                type: 'success',
+                text1: 'Logout effettuato',
+                text2: 'A presto!',
+                position: 'bottom',
+              });
+            } catch (error) {
+              Toast.show({
+                type: 'error',
+                text1: 'Errore',
+                text2: 'Impossibile effettuare il logout',
                 position: 'bottom',
               });
             }
@@ -329,6 +371,32 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
                 </Text>
                 <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
                   Face ID / Touch ID
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#718096" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`flex-row items-center justify-between p-4 rounded-2xl mb-2 ${
+              isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+            }`}
+            onPress={handleLogout}
+          >
+            <View className="flex-row items-center flex-1">
+              <View className={`w-11 h-11 rounded-xl items-center justify-center mr-3 ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}>
+                <Ionicons name="log-out" size={22} color="#EF4444" />
+              </View>
+              <View className="flex-1">
+                <Text className={`font-semibold mb-1 ${
+                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                }`}>
+                  Logout
+                </Text>
+                <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
+                  Esci dall'account
                 </Text>
               </View>
             </View>

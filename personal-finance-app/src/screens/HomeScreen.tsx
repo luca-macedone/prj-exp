@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { QuickTransactionForm } from '../components/QuickTransactionForm';
 import { SettingsScreen } from './SettingsScreen';
@@ -17,6 +18,7 @@ import { NotificationsScreen } from './NotificationsScreen';
 export const HomeScreen: React.FC = () => {
   const { transactions, addTransaction } = useData();
   const { colorScheme } = useTheme();
+  const { logout } = useAuth();
   const navigation = useNavigation();
   const [quickAddVisible, setQuickAddVisible] = React.useState(false);
   const [settingsVisible, setSettingsVisible] = React.useState(false);
@@ -351,7 +353,10 @@ export const HomeScreen: React.FC = () => {
         presentationStyle="pageSheet"
         onRequestClose={() => setSettingsVisible(false)}
       >
-        <SettingsScreen onClose={() => setSettingsVisible(false)} />
+        <SettingsScreen
+          onClose={() => setSettingsVisible(false)}
+          onLogout={logout}
+        />
       </Modal>
 
       <Modal

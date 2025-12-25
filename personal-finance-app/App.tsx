@@ -26,43 +26,15 @@ import {
 } from './src/screens/auth';
 
 // Services
-import SecureDatabase from './src/services/storage/SecureDatabase';
-import AuthService from './src/services/authentication/AuthService';
 import { DataProvider } from './src/context/DataContext';
 import { DeveloperMenu } from './src/components/DeveloperMenu';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Tab = createBottomTabNavigator();
 
-type AuthState = 'loading' | 'welcome' | 'login' | 'register' | 'unlock' | 'authenticated';
-
 const AppContent: React.FC = () => {
-  const [authState, setAuthState] = useState<AuthState>('loading');
-
-  useEffect(() => {
-    initializeApp();
-  }, []);
-
-  const initializeApp = async () => {
-    try {
-      // Initialize database
-      await SecureDatabase.initialize();
-
-      // Check if user is registered
-      const isRegistered = await AuthService.isUserRegistered();
-
-      if (isRegistered) {
-        // User exists, show unlock screen
-        setAuthState('unlock');
-      } else {
-        // New user, show welcome screen
-        setAuthState('welcome');
-      }
-    } catch (error) {
-      console.error('Failed to initialize app:', error);
-      setAuthState('welcome'); // Fallback to welcome
-    }
-  };
+  const { authState, setAuthState } = useAuth();
 
   const handleAuthSuccess = () => {
     setAuthState('authenticated');
@@ -100,7 +72,10 @@ const AppContent: React.FC = () => {
           />
         )}
         {authState === 'unlock' && (
-          <UnlockScreen onSuccess={handleAuthSuccess} />
+          <UnlockScreen
+            onSuccess={handleAuthSuccess}
+            onChangeUser={() => setAuthState('welcome')}
+          />
         )}
       </>
     );
@@ -182,7 +157,9 @@ export default function App() {
     <>
       <SafeAreaProvider>
         <ThemeProvider>
-          <AppContent />
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>
       <Toast />
