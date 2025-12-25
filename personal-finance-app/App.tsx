@@ -2,6 +2,7 @@
  * Personal Finance App - Main entry point
  */
 
+import './global.css';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
