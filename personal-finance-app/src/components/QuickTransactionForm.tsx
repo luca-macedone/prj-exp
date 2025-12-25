@@ -1,5 +1,5 @@
 /**
- * QuickTransactionForm - Form rapido per aggiungere transazioni
+ * QuickTransactionForm - Form rapido per aggiungere transazioni con Tailwind
  */
 
 import React, { useState } from 'react';
@@ -8,14 +8,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   ScrollView,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface QuickTransactionFormProps {
   visible: boolean;
@@ -29,13 +28,13 @@ interface QuickTransactionFormProps {
 }
 
 const CATEGORIES = [
-  { name: 'Food', icon: 'restaurant', color: colors.categories.Food },
-  { name: 'Transport', icon: 'car', color: colors.categories.Transport },
-  { name: 'Shopping', icon: 'cart', color: colors.categories.Shopping },
-  { name: 'Bills', icon: 'receipt', color: colors.categories.Bills },
-  { name: 'Entertainment', icon: 'game-controller', color: colors.categories.Entertainment },
-  { name: 'Health', icon: 'medkit', color: colors.categories.Health },
-  { name: 'Other', icon: 'ellipsis-horizontal', color: colors.categories.Other }
+  { name: 'Food', icon: 'restaurant', color: '#FF6B6B' },
+  { name: 'Transport', icon: 'car', color: '#4ECDC4' },
+  { name: 'Shopping', icon: 'cart', color: '#FFD93D' },
+  { name: 'Bills', icon: 'receipt', color: '#6C5CE7' },
+  { name: 'Entertainment', icon: 'game-controller', color: '#FF8787' },
+  { name: 'Health', icon: 'medkit', color: '#A8E6CF' },
+  { name: 'Other', icon: 'ellipsis-horizontal', color: '#95A5A6' }
 ];
 
 export const QuickTransactionForm: React.FC<QuickTransactionFormProps> = ({
@@ -43,6 +42,9 @@ export const QuickTransactionForm: React.FC<QuickTransactionFormProps> = ({
   onClose,
   onSubmit
 }) => {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
+
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Food');
@@ -76,116 +78,159 @@ export const QuickTransactionForm: React.FC<QuickTransactionFormProps> = ({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        className="flex-1 justify-end"
       >
         <TouchableOpacity
-          style={styles.overlay}
+          className="flex-1 bg-black/50"
           activeOpacity={1}
           onPress={onClose}
         />
 
-        <View style={styles.content}>
+        <View className={`rounded-t-3xl max-h-[90%] pb-6 ${
+          isDark ? 'bg-background-card-dark' : 'bg-background-card-light'
+        }`}>
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={colors.text.secondary} />
+          <View className="flex-row items-center justify-between px-5 pt-6 pb-3">
+            <TouchableOpacity
+              className={`w-10 h-10 rounded-xl justify-center items-center ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}
+              onPress={onClose}
+            >
+              <Ionicons name="close" size={24} color={isDark ? '#D1D5DB' : '#6B7280'} />
             </TouchableOpacity>
-            <Text style={styles.title}>Nuova Transazione</Text>
-            <View style={{ width: 40 }} />
+            <Text className={`text-xl font-bold ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Nuova Transazione
+            </Text>
+            <View className="w-10" />
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Type Toggle */}
-            <View style={styles.typeToggle}>
-              <TouchableOpacity
-                style={[styles.typeButton, !isExpense && styles.typeButtonActive]}
-                onPress={() => setIsExpense(false)}
-              >
-                <Ionicons
-                  name="arrow-down"
-                  size={20}
-                  color={!isExpense ? colors.success : colors.text.secondary}
-                />
-                <Text style={[
-                  styles.typeText,
-                  !isExpense && { color: colors.success, fontWeight: '700' }
-                ]}>
-                  Entrata
-                </Text>
-              </TouchableOpacity>
+            <View className={`mx-5 mb-6 rounded-xl p-1 ${
+              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+            }`}>
+              <View className="flex-row">
+                <TouchableOpacity
+                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg gap-2 ${
+                    !isExpense ? (isDark ? 'bg-background-card-dark' : 'bg-background-card-light') : ''
+                  }`}
+                  onPress={() => setIsExpense(false)}
+                >
+                  <Ionicons
+                    name="arrow-down"
+                    size={20}
+                    color={!isExpense ? '#10B981' : (isDark ? '#9CA3AF' : '#6B7280')}
+                  />
+                  <Text className={`text-base font-semibold ${
+                    !isExpense ? 'text-success font-bold' : (isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light')
+                  }`}>
+                    Entrata
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.typeButton, isExpense && styles.typeButtonActive]}
-                onPress={() => setIsExpense(true)}
-              >
-                <Ionicons
-                  name="arrow-up"
-                  size={20}
-                  color={isExpense ? colors.error : colors.text.secondary}
-                />
-                <Text style={[
-                  styles.typeText,
-                  isExpense && { color: colors.error, fontWeight: '700' }
-                ]}>
-                  Uscita
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 flex-row items-center justify-center py-3 rounded-lg gap-2 ${
+                    isExpense ? (isDark ? 'bg-background-card-dark' : 'bg-background-card-light') : ''
+                  }`}
+                  onPress={() => setIsExpense(true)}
+                >
+                  <Ionicons
+                    name="arrow-up"
+                    size={20}
+                    color={isExpense ? '#EF4444' : (isDark ? '#9CA3AF' : '#6B7280')}
+                  />
+                  <Text className={`text-base font-semibold ${
+                    isExpense ? 'text-error font-bold' : (isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light')
+                  }`}>
+                    Uscita
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Amount Input */}
-            <View style={styles.amountSection}>
-              <Text style={styles.currencySymbol}>€</Text>
+            <View className="flex-row items-center justify-center px-5 mb-8">
+              <Text className={`text-5xl font-light mr-2 ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                €
+              </Text>
               <TextInput
-                style={styles.amountInput}
+                className={`text-6xl font-bold min-w-[120px] ${
+                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                }`}
                 value={amount}
                 onChangeText={setAmount}
                 placeholder="0,00"
-                placeholderTextColor={colors.text.tertiary}
+                placeholderTextColor={isDark ? '#9CA3AF' : '#9CA3AF'}
                 keyboardType="decimal-pad"
                 autoFocus
               />
             </View>
 
             {/* Description Input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Descrizione</Text>
+            <View className="px-5 mb-6">
+              <Text className={`text-sm font-semibold mb-2 ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Descrizione
+              </Text>
               <TextInput
-                style={styles.input}
+                className={`rounded-xl px-5 py-3.5 text-base ${
+                  isDark
+                    ? 'bg-background-secondary-dark text-text-primary-dark'
+                    : 'bg-background-secondary-light text-text-primary-light'
+                }`}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Es: Spesa supermercato"
-                placeholderTextColor={colors.text.tertiary}
+                placeholderTextColor={isDark ? '#9CA3AF' : '#9CA3AF'}
                 returnKeyType="done"
               />
             </View>
 
             {/* Category Selection */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Categoria</Text>
-              <View style={styles.categoriesGrid}>
+            <View className="px-5 mb-6">
+              <Text className={`text-sm font-semibold mb-2 ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Categoria
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
                     key={cat.name}
-                    style={[
-                      styles.categoryButton,
-                      category === cat.name && {
-                        backgroundColor: cat.color + '30',
-                        borderColor: cat.color
-                      }
-                    ]}
+                    className={`flex-row items-center px-3 py-2 rounded-xl border-[1.5px] gap-2 ${
+                      category === cat.name
+                        ? 'border-[${cat.color}]'
+                        : 'border-transparent'
+                    } ${
+                      isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+                    }`}
+                    style={category === cat.name ? {
+                      backgroundColor: `${cat.color}30`,
+                      borderColor: cat.color
+                    } : {}}
                     onPress={() => setCategory(cat.name)}
                   >
-                    <View style={[styles.categoryIcon, { backgroundColor: cat.color + '20' }]}>
+                    <View
+                      className="w-8 h-8 rounded-lg justify-center items-center"
+                      style={{ backgroundColor: `${cat.color}20` }}
+                    >
                       <Ionicons
                         name={cat.icon as any}
                         size={20}
                         color={cat.color}
                       />
                     </View>
-                    <Text style={[
-                      styles.categoryText,
-                      category === cat.name && { color: colors.text.primary, fontWeight: '600' }
-                    ]}>
+                    <Text className={`text-sm ${
+                      category === cat.name
+                        ? isDark ? 'text-text-primary-dark font-semibold' : 'text-text-primary-light font-semibold'
+                        : isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                    }`}>
                       {cat.name}
                     </Text>
                   </TouchableOpacity>
@@ -196,163 +241,18 @@ export const QuickTransactionForm: React.FC<QuickTransactionFormProps> = ({
 
           {/* Submit Button */}
           <TouchableOpacity
-            style={[
-              styles.submitButton,
-              (!amount || !description) && styles.submitButtonDisabled
-            ]}
+            className={`mx-5 mt-5 bg-primary py-4 rounded-xl items-center ${
+              (!amount || !description) ? 'opacity-50' : ''
+            }`}
             onPress={handleSubmit}
             disabled={!amount || !description}
           >
-            <Text style={styles.submitButtonText}>Aggiungi Transazione</Text>
+            <Text className="text-white text-lg font-bold">
+              Aggiungi Transazione
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-end'
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlay
-  },
-  content: {
-    backgroundColor: colors.background.card,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    maxHeight: '90%',
-    paddingBottom: spacing.xl
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  typeToggle: {
-    flexDirection: 'row',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: 4
-  },
-  typeButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.sm,
-    gap: spacing.sm
-  },
-  typeButtonActive: {
-    backgroundColor: colors.background.card
-  },
-  typeText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  amountSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xxl
-  },
-  currencySymbol: {
-    fontSize: 48,
-    fontWeight: '300',
-    color: colors.text.secondary,
-    marginRight: spacing.sm
-  },
-  amountInput: {
-    fontSize: 56,
-    fontWeight: '700',
-    color: colors.text.primary,
-    minWidth: 120,
-    textAlign: 'left'
-  },
-  inputGroup: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xl
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    marginBottom: spacing.sm
-  },
-  input: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    fontSize: 16,
-    color: colors.text.primary
-  },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm
-  },
-  categoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    gap: spacing.sm
-  },
-  categoryIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  categoryText: {
-    fontSize: 14,
-    color: colors.text.secondary
-  },
-  submitButton: {
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.lg,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    ...colors.shadow.md
-  },
-  submitButtonDisabled: {
-    opacity: 0.5
-  },
-  submitButtonText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  }
-});

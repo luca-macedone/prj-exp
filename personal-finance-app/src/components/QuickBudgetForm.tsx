@@ -1,5 +1,5 @@
 /**
- * QuickBudgetForm - Form rapido per creare budget
+ * QuickBudgetForm - Form rapido per creare budget con Tailwind
  */
 
 import React, { useState } from 'react';
@@ -8,14 +8,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   ScrollView,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface QuickBudgetFormProps {
   visible: boolean;
@@ -28,13 +27,13 @@ interface QuickBudgetFormProps {
 }
 
 const CATEGORIES = [
-  { name: 'Food', icon: 'restaurant', color: colors.categories.Food },
-  { name: 'Transport', icon: 'car', color: colors.categories.Transport },
-  { name: 'Shopping', icon: 'cart', color: colors.categories.Shopping },
-  { name: 'Bills', icon: 'receipt', color: colors.categories.Bills },
-  { name: 'Entertainment', icon: 'game-controller', color: colors.categories.Entertainment },
-  { name: 'Health', icon: 'medkit', color: colors.categories.Health },
-  { name: 'Other', icon: 'ellipsis-horizontal', color: colors.categories.Other }
+  { name: 'Food', icon: 'restaurant', color: '#FF6B6B' },
+  { name: 'Transport', icon: 'car', color: '#4ECDC4' },
+  { name: 'Shopping', icon: 'cart', color: '#FFD93D' },
+  { name: 'Bills', icon: 'receipt', color: '#6C5CE7' },
+  { name: 'Entertainment', icon: 'game-controller', color: '#FF8787' },
+  { name: 'Health', icon: 'medkit', color: '#A8E6CF' },
+  { name: 'Other', icon: 'ellipsis-horizontal', color: '#95A5A6' }
 ];
 
 const PERIODS = [
@@ -49,6 +48,9 @@ export const QuickBudgetForm: React.FC<QuickBudgetFormProps> = ({
   onClose,
   onSubmit
 }) => {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
+
   const [limit, setLimit] = useState('');
   const [category, setCategory] = useState('Food');
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
@@ -80,36 +82,57 @@ export const QuickBudgetForm: React.FC<QuickBudgetFormProps> = ({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        className="flex-1 justify-end"
       >
         <TouchableOpacity
-          style={styles.overlay}
+          className="flex-1 bg-black/50"
           activeOpacity={1}
           onPress={onClose}
         />
 
-        <View style={styles.content}>
+        <View className={`rounded-t-3xl max-h-[90%] pb-6 ${
+          isDark ? 'bg-background-card-dark' : 'bg-background-card-light'
+        }`}>
           {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={colors.text.secondary} />
+          <View className="flex-row items-center justify-between px-5 pt-6 pb-3">
+            <TouchableOpacity
+              className={`w-10 h-10 rounded-xl justify-center items-center ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}
+              onPress={onClose}
+            >
+              <Ionicons name="close" size={24} color={isDark ? '#D1D5DB' : '#6B7280'} />
             </TouchableOpacity>
-            <Text style={styles.title}>Nuovo Budget</Text>
-            <View style={{ width: 40 }} />
+            <Text className={`text-xl font-bold ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Nuovo Budget
+            </Text>
+            <View className="w-10" />
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Limit Input */}
-            <View style={styles.limitSection}>
-              <Text style={styles.limitLabel}>Limite mensile</Text>
-              <View style={styles.limitInputContainer}>
-                <Text style={styles.currencySymbol}>€</Text>
+            <View className="items-center px-5 mb-8">
+              <Text className={`text-sm font-semibold mb-3 ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Limite mensile
+              </Text>
+              <View className="flex-row items-center justify-center">
+                <Text className={`text-5xl font-light mr-2 ${
+                  isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                }`}>
+                  €
+                </Text>
                 <TextInput
-                  style={styles.limitInput}
+                  className={`text-6xl font-bold min-w-[120px] ${
+                    isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}
                   value={limit}
                   onChangeText={setLimit}
                   placeholder="0,00"
-                  placeholderTextColor={colors.text.tertiary}
+                  placeholderTextColor={isDark ? '#9CA3AF' : '#9CA3AF'}
                   keyboardType="decimal-pad"
                   autoFocus
                 />
@@ -117,32 +140,44 @@ export const QuickBudgetForm: React.FC<QuickBudgetFormProps> = ({
             </View>
 
             {/* Category Selection */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Categoria</Text>
-              <View style={styles.categoriesGrid}>
+            <View className="px-5 mb-6">
+              <Text className={`text-sm font-semibold mb-2 ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Categoria
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
                     key={cat.name}
-                    style={[
-                      styles.categoryButton,
-                      category === cat.name && {
-                        backgroundColor: cat.color + '30',
-                        borderColor: cat.color
-                      }
-                    ]}
+                    className={`flex-row items-center px-3 py-2 rounded-xl border-[1.5px] gap-2 ${
+                      category === cat.name
+                        ? 'border-[${cat.color}]'
+                        : 'border-transparent'
+                    } ${
+                      isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+                    }`}
+                    style={category === cat.name ? {
+                      backgroundColor: `${cat.color}30`,
+                      borderColor: cat.color
+                    } : {}}
                     onPress={() => setCategory(cat.name)}
                   >
-                    <View style={[styles.categoryIcon, { backgroundColor: cat.color + '20' }]}>
+                    <View
+                      className="w-8 h-8 rounded-lg justify-center items-center"
+                      style={{ backgroundColor: `${cat.color}20` }}
+                    >
                       <Ionicons
                         name={cat.icon as any}
                         size={20}
                         color={cat.color}
                       />
                     </View>
-                    <Text style={[
-                      styles.categoryText,
-                      category === cat.name && { color: colors.text.primary, fontWeight: '600' }
-                    ]}>
+                    <Text className={`text-sm ${
+                      category === cat.name
+                        ? isDark ? 'text-text-primary-dark font-semibold' : 'text-text-primary-light font-semibold'
+                        : isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                    }`}>
                       {cat.name}
                     </Text>
                   </TouchableOpacity>
@@ -151,27 +186,38 @@ export const QuickBudgetForm: React.FC<QuickBudgetFormProps> = ({
             </View>
 
             {/* Period Selection */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Periodo</Text>
-              <View style={styles.periodsGrid}>
+            <View className="px-5 mb-6">
+              <Text className={`text-sm font-semibold mb-2 ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Periodo
+              </Text>
+              <View className="flex-row gap-2">
                 {PERIODS.map((p) => (
                   <TouchableOpacity
                     key={p.value}
-                    style={[
-                      styles.periodButton,
-                      period === p.value && styles.periodButtonActive
-                    ]}
+                    className={`flex-1 items-center py-4 rounded-xl border-2 ${
+                      period === p.value
+                        ? 'border-primary'
+                        : 'border-transparent'
+                    } ${
+                      isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+                    }`}
+                    style={period === p.value ? {
+                      backgroundColor: '#007AFF20'
+                    } : {}}
                     onPress={() => setPeriod(p.value)}
                   >
                     <Ionicons
                       name={p.icon as any}
                       size={24}
-                      color={period === p.value ? colors.primary : colors.text.secondary}
+                      color={period === p.value ? '#007AFF' : (isDark ? '#9CA3AF' : '#6B7280')}
                     />
-                    <Text style={[
-                      styles.periodText,
-                      period === p.value && styles.periodTextActive
-                    ]}>
+                    <Text className={`text-xs font-semibold mt-1 ${
+                      period === p.value
+                        ? 'text-primary'
+                        : isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                    }`}>
                       {p.label}
                     </Text>
                   </TouchableOpacity>
@@ -182,165 +228,18 @@ export const QuickBudgetForm: React.FC<QuickBudgetFormProps> = ({
 
           {/* Submit Button */}
           <TouchableOpacity
-            style={[
-              styles.submitButton,
-              !limit && styles.submitButtonDisabled
-            ]}
+            className={`mx-5 mt-5 bg-primary py-4 rounded-xl items-center ${
+              !limit ? 'opacity-50' : ''
+            }`}
             onPress={handleSubmit}
             disabled={!limit}
           >
-            <Text style={styles.submitButtonText}>Crea Budget</Text>
+            <Text className="text-white text-lg font-bold">
+              Crea Budget
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-end'
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlay
-  },
-  content: {
-    backgroundColor: colors.background.card,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    maxHeight: '90%',
-    paddingBottom: spacing.xl
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  limitSection: {
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xxl
-  },
-  limitLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    marginBottom: spacing.md
-  },
-  limitInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  currencySymbol: {
-    fontSize: 48,
-    fontWeight: '300',
-    color: colors.text.secondary,
-    marginRight: spacing.sm
-  },
-  limitInput: {
-    fontSize: 56,
-    fontWeight: '700',
-    color: colors.text.primary,
-    minWidth: 120,
-    textAlign: 'left'
-  },
-  inputGroup: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xl
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    marginBottom: spacing.sm
-  },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm
-  },
-  categoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    gap: spacing.sm
-  },
-  categoryIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  categoryText: {
-    fontSize: 14,
-    color: colors.text.secondary
-  },
-  periodsGrid: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  periodButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 2,
-    borderColor: 'transparent'
-  },
-  periodButtonActive: {
-    backgroundColor: colors.primary + '20',
-    borderColor: colors.primary
-  },
-  periodText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    marginTop: spacing.xs
-  },
-  periodTextActive: {
-    color: colors.primary
-  },
-  submitButton: {
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.lg,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    ...colors.shadow.md
-  },
-  submitButtonDisabled: {
-    opacity: 0.5
-  },
-  submitButtonText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  }
-});
