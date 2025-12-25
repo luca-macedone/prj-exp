@@ -1,13 +1,12 @@
 /**
- * WelcomeScreen - First screen shown to users
+ * WelcomeScreen - First screen shown to users with Tailwind
  */
 
 import React from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
-  StyleSheet
+  TouchableOpacity
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,30 +20,36 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onRegister
 }) => {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Personal Finance</Text>
-        <Text style={styles.subtitle}>
+    <SafeAreaView className="flex-1 bg-[#F5F7FA]">
+      <View className="flex-1 justify-center items-center px-6">
+        <Text className="text-4xl font-bold text-[#2C3E50] mb-3">
+          Personal Finance
+        </Text>
+        <Text className="text-base text-[#7F8C8D] text-center mb-12">
           Gestisci le tue finanze in modo sicuro e privato
         </Text>
 
-        <View style={styles.buttonContainer}>
+        <View className="w-full max-w-[300px] gap-4">
           <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
+            className="bg-primary py-4 px-8 rounded-xl items-center"
             onPress={onLogin}
           >
-            <Text style={styles.primaryButtonText}>Accedi</Text>
+            <Text className="text-white text-lg font-semibold">
+              Accedi
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            className="bg-white py-4 px-8 rounded-xl items-center border-2 border-primary"
             onPress={onRegister}
           >
-            <Text style={styles.secondaryButtonText}>Registrati</Text>
+            <Text className="text-primary text-lg font-semibold">
+              Registrati
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.privacyNote}>
+        <Text className="mt-12 text-xs text-[#95A5A6] text-center">
           I tuoi dati sono salvati solo sul tuo dispositivo.{'\n'}
           Massima privacy garantita.
         </Text>
@@ -52,63 +57,3 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA'
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 12
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7F8C8D',
-    textAlign: 'center',
-    marginBottom: 48
-  },
-  buttonContainer: {
-    width: '100%',
-    maxWidth: 300,
-    gap: 16
-  },
-  button: {
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    alignItems: 'center'
-  },
-  primaryButton: {
-    backgroundColor: '#007AFF'
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600'
-  },
-  secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#007AFF'
-  },
-  secondaryButtonText: {
-    color: '#007AFF',
-    fontSize: 18,
-    fontWeight: '600'
-  },
-  privacyNote: {
-    marginTop: 48,
-    fontSize: 12,
-    color: '#95A5A6',
-    textAlign: 'center'
-  }
-});

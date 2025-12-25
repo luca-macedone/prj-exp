@@ -1,5 +1,5 @@
 /**
- * UnlockScreen - Unlock app with biometrics or PIN
+ * UnlockScreen - Unlock app with biometrics or PIN with Tailwind
  */
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +7,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,29 +55,31 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ onSuccess }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>App Bloccata</Text>
-        <Text style={styles.subtitle}>
+    <SafeAreaView className="flex-1 bg-[#F5F7FA]">
+      <View className="flex-1 justify-center items-center px-6">
+        <Text className="text-3xl font-bold text-[#2C3E50] mb-3">
+          App Bloccata
+        </Text>
+        <Text className="text-base text-[#7F8C8D] text-center mb-12">
           Sblocca per accedere alle tue finanze
         </Text>
 
-        <View style={styles.buttonContainer}>
+        <View className="w-full max-w-[300px] gap-4">
           <TouchableOpacity
-            style={styles.button}
+            className="bg-primary py-4 px-8 rounded-xl items-center"
             onPress={tryBiometricUnlock}
           >
-            <Text style={styles.buttonText}>
+            <Text className="text-white text-lg font-semibold">
               Usa Biometria
             </Text>
           </TouchableOpacity>
 
           {showPinOption && (
             <TouchableOpacity
-              style={[styles.button, styles.secondaryButton]}
+              className="bg-white py-4 px-8 rounded-xl items-center border-2 border-primary"
               onPress={handlePinUnlock}
             >
-              <Text style={styles.secondaryButtonText}>
+              <Text className="text-primary text-lg font-semibold">
                 Usa PIN
               </Text>
             </TouchableOpacity>
@@ -88,55 +89,3 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ onSuccess }) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA'
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 12
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7F8C8D',
-    textAlign: 'center',
-    marginBottom: 48
-  },
-  buttonContainer: {
-    width: '100%',
-    maxWidth: 300,
-    gap: 16
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    alignItems: 'center'
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600'
-  },
-  secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#007AFF'
-  },
-  secondaryButtonText: {
-    color: '#007AFF',
-    fontSize: 18,
-    fontWeight: '600'
-  }
-});

@@ -1,5 +1,5 @@
 /**
- * LoginScreen - User login
+ * LoginScreen - User login with Tailwind
  */
 
 import React, { useState } from 'react';
@@ -8,7 +8,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   ActivityIndicator
 } from 'react-native';
@@ -51,16 +50,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Bentornato</Text>
-        <Text style={styles.subtitle}>
+    <SafeAreaView className="flex-1 bg-[#F5F7FA]">
+      <View className="flex-1 px-6">
+        <Text className="text-3xl font-bold text-[#2C3E50] mt-6 mb-2">
+          Bentornato
+        </Text>
+        <Text className="text-sm text-[#7F8C8D] mb-8">
           Accedi al tuo account
         </Text>
 
-        <View style={styles.form}>
+        <View className="w-full max-w-[400px]">
           <TextInput
-            style={styles.input}
+            className="bg-white border border-[#E5E5EA] rounded-xl px-4 py-3.5 text-base mb-4"
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
@@ -70,7 +71,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           />
 
           <TextInput
-            style={styles.input}
+            className="bg-white border border-[#E5E5EA] rounded-xl px-4 py-3.5 text-base mb-4"
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
@@ -80,87 +81,32 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           />
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            className={`bg-primary py-4 rounded-xl items-center mt-2 ${
+              loading ? 'opacity-60' : ''
+            }`}
             onPress={handleLogin}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>Accedi</Text>
+              <Text className="text-white text-lg font-semibold">
+                Accedi
+              </Text>
             )}
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.backButton}
+            className="py-3 items-center mt-4"
             onPress={onBack}
             disabled={loading}
           >
-            <Text style={styles.backButtonText}>Indietro</Text>
+            <Text className="text-primary text-base">
+              Indietro
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA'
-  },
-  content: {
-    flex: 1,
-    padding: 24
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#2C3E50',
-    marginTop: 24,
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#7F8C8D',
-    marginBottom: 32
-  },
-  form: {
-    width: '100%',
-    maxWidth: 400
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 16
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8
-  },
-  buttonDisabled: {
-    opacity: 0.6
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600'
-  },
-  backButton: {
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 16
-  },
-  backButtonText: {
-    color: '#007AFF',
-    fontSize: 16
-  }
-});

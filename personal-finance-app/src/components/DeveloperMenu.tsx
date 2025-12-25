@@ -1,5 +1,5 @@
 /**
- * DeveloperMenu - Menu sviluppatore per reset e seed database
+ * DeveloperMenu - Menu sviluppatore per reset e seed database con Tailwind
  * Accessibile con shake gesture o long press in alto a sinistra
  */
 
@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Modal,
   TouchableOpacity,
   Alert,
@@ -15,10 +14,13 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Accelerometer } from 'expo-sensors';
-import { colors, spacing, borderRadius } from '../theme';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const DeveloperMenu: React.FC = () => {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
+
   const [visible, setVisible] = useState(false);
   const { resetDatabase, seedDatabase, transactions, budgets } = useData();
   const [shakeCount, setShakeCount] = useState(0);
@@ -109,11 +111,15 @@ export const DeveloperMenu: React.FC = () => {
     <>
       {/* Developer Icon - Long press to open */}
       <TouchableOpacity
-        style={styles.devIcon}
+        className="absolute top-[50px] left-4 w-8 h-8 rounded-full justify-center items-center z-[1000] border"
+        style={{
+          backgroundColor: '#F59E0B20',
+          borderColor: '#F59E0B40'
+        }}
         onLongPress={() => setVisible(true)}
         delayLongPress={1000}
       >
-        <Ionicons name="bug" size={16} color={colors.warning} />
+        <Ionicons name="bug" size={16} color="#F59E0B" />
       </TouchableOpacity>
 
       <Modal
@@ -122,61 +128,101 @@ export const DeveloperMenu: React.FC = () => {
         animationType="fade"
         onRequestClose={() => setVisible(false)}
       >
-        <View style={styles.overlay}>
-          <View style={styles.menu}>
+        <View className="flex-1 bg-black/80 justify-center items-center px-6">
+          <View className={`w-full max-w-[400px] rounded-3xl p-6 ${
+            isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-lg'
+          }`}>
             {/* Header */}
-            <View style={styles.header}>
-              <Ionicons name="construct" size={28} color={colors.primary} />
-              <Text style={styles.title}>Developer Tools</Text>
+            <View className="flex-row items-center mb-6 gap-3">
+              <Ionicons name="construct" size={28} color="#007AFF" />
+              <Text className={`flex-1 text-2xl font-bold ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Developer Tools
+              </Text>
               <TouchableOpacity
-                style={styles.closeButton}
+                className={`w-9 h-9 rounded-xl justify-center items-center ${
+                  isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+                }`}
                 onPress={() => setVisible(false)}
               >
-                <Ionicons name="close" size={24} color={colors.text.secondary} />
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color={isDark ? '#D1D5DB' : '#6B7280'}
+                />
               </TouchableOpacity>
             </View>
 
             {/* Stats */}
-            <View style={styles.stats}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{transactions.length}</Text>
-                <Text style={styles.statLabel}>Transazioni</Text>
+            <View className="flex-row gap-3 mb-6">
+              <View className={`flex-1 p-4 rounded-xl items-center ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}>
+                <Text className="text-primary text-3xl font-bold mb-1">
+                  {transactions.length}
+                </Text>
+                <Text className={`text-sm ${
+                  isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                }`}>
+                  Transazioni
+                </Text>
               </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{budgets.length}</Text>
-                <Text style={styles.statLabel}>Budget</Text>
+              <View className={`flex-1 p-4 rounded-xl items-center ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}>
+                <Text className="text-primary text-3xl font-bold mb-1">
+                  {budgets.length}
+                </Text>
+                <Text className={`text-sm ${
+                  isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                }`}>
+                  Budget
+                </Text>
               </View>
             </View>
 
             {/* Actions */}
-            <View style={styles.actions}>
+            <View className="gap-3 mb-4">
               <TouchableOpacity
-                style={[styles.actionButton, styles.seedButton]}
+                className="bg-success p-4 rounded-xl items-center gap-1"
                 onPress={handleSeed}
               >
                 <Ionicons name="flash" size={24} color="#FFFFFF" />
-                <Text style={styles.actionButtonText}>Seed Database</Text>
-                <Text style={styles.actionButtonSubtext}>
+                <Text className="text-white text-base font-bold">
+                  Seed Database
+                </Text>
+                <Text className="text-white/80 text-sm">
                   Aggiungi dati di esempio
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.actionButton, styles.resetButton]}
+                className="bg-error p-4 rounded-xl items-center gap-1"
                 onPress={handleReset}
               >
                 <Ionicons name="trash" size={24} color="#FFFFFF" />
-                <Text style={styles.actionButtonText}>Reset Database</Text>
-                <Text style={styles.actionButtonSubtext}>
+                <Text className="text-white text-base font-bold">
+                  Reset Database
+                </Text>
+                <Text className="text-white/80 text-sm">
                   Cancella tutti i dati
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Info */}
-            <View style={styles.info}>
-              <Ionicons name="information-circle-outline" size={16} color={colors.text.tertiary} />
-              <Text style={styles.infoText}>
+            <View className={`flex-row items-center gap-2 p-3 rounded-lg ${
+              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+            }`}>
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color={isDark ? '#9CA3AF' : '#9CA3AF'}
+              />
+              <Text className={`flex-1 text-xs ${
+                isDark ? 'text-text-tertiary-dark' : 'text-text-tertiary-light'
+              }`}>
                 {Platform.OS === 'ios' ? 'Shake device' : 'Shake o long press'} per aprire questo menu
               </Text>
             </View>
@@ -186,115 +232,3 @@ export const DeveloperMenu: React.FC = () => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  devIcon: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.warning + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-    borderWidth: 1,
-    borderColor: colors.warning + '40'
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl
-  },
-  menu: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.xl,
-    padding: spacing.xl,
-    ...colors.shadow.lg
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-    gap: spacing.md
-  },
-  title: {
-    flex: 1,
-    fontSize: 22,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.xl
-  },
-  statItem: {
-    flex: 1,
-    backgroundColor: colors.background.secondary,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    alignItems: 'center'
-  },
-  statValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: 4
-  },
-  statLabel: {
-    fontSize: 13,
-    color: colors.text.secondary
-  },
-  actions: {
-    gap: spacing.md,
-    marginBottom: spacing.lg
-  },
-  actionButton: {
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  seedButton: {
-    backgroundColor: colors.success
-  },
-  resetButton: {
-    backgroundColor: colors.error
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  },
-  actionButtonSubtext: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.8)'
-  },
-  info: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.background.secondary,
-    padding: spacing.md,
-    borderRadius: borderRadius.sm
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 12,
-    color: colors.text.tertiary
-  }
-});
