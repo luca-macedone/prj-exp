@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -53,7 +53,9 @@ const AppContent: React.FC = () => {
   // Loading state
   if (authState === 'loading') {
     return (
-      <View style={styles.loading}>
+      <View className={`flex-1 justify-center items-center ${
+        isDark ? 'bg-background-primary-dark' : 'bg-background-primary-light'
+      }`}>
         <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
@@ -180,12 +182,3 @@ export default function App() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary
-  }
-});
