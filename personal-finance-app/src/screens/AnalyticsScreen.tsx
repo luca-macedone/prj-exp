@@ -339,7 +339,7 @@ export const AnalyticsScreen: React.FC = () => {
       <Modal
         visible={showFilters}
         animationType="slide"
-        presentationStyle="pageSheet"
+        transparent={false}
         onRequestClose={() => setShowFilters(false)}
       >
         <SafeAreaView
