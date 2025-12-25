@@ -1,6 +1,6 @@
 /**
  * BudgetList Component
- * Visualizza lista di budget con indicatori visivi per overspending
+ * Visualizza lista di budget con indicatori visivi per overspending (Tailwind)
  */
 
 import React from 'react';
@@ -8,14 +8,13 @@ import {
   FlatList,
   View,
   Text,
-  StyleSheet,
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Budget } from '../../../types';
 import { BudgetStatus } from '../hooks/useBudgets';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface BudgetListProps {
   budgets: Budget[];
@@ -32,6 +31,8 @@ export const BudgetList: React.FC<BudgetListProps> = ({
   getBudgetStatus,
   onBudgetPress
 }) => {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
   const [refreshing, setRefreshing] = React.useState(false);
 
   const handleRefresh = async () => {
@@ -47,6 +48,7 @@ export const BudgetList: React.FC<BudgetListProps> = ({
       budget={item}
       status={getBudgetStatus(item)}
       onPress={() => onBudgetPress?.(item)}
+      isDark={isDark}
     />
   );
 
@@ -54,35 +56,45 @@ export const BudgetList: React.FC<BudgetListProps> = ({
 
   if (loading && budgets.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Caricamento budget...</Text>
+      <View className="flex-1 justify-center items-center p-12">
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text className={`mt-4 text-base ${isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'}`}>
+          Caricamento budget...
+        </Text>
       </View>
     );
   }
 
   if (budgets.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <View style={styles.emptyIconContainer}>
-          <Ionicons name="wallet-outline" size={80} color={colors.text.tertiary} />
+      <View className="flex-1 justify-center items-center p-12">
+        <View className="mb-8">
+          <Ionicons name="wallet-outline" size={80} color={isDark ? '#718096' : '#9CA3AF'} />
         </View>
-        <Text style={styles.emptyText}>Nessun budget configurato</Text>
-        <Text style={styles.emptySubtext}>
+        <Text className={`text-2xl font-bold mb-4 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+          Nessun budget configurato
+        </Text>
+        <Text className={`text-base text-center leading-6 mb-12 ${isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'}`}>
           Imposta limiti di spesa per categoria{'\n'}e monitora i tuoi progressi{'\n'}verso i tuoi obiettivi finanziari
         </Text>
-        <View style={styles.emptyTips}>
-          <View style={styles.tipItem}>
-            <Ionicons name="trophy" size={20} color={colors.warning} />
-            <Text style={styles.tipText}>Raggiungi i tuoi obiettivi di risparmio</Text>
+        <View className={`w-full rounded-xl p-6 ${isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'}`}>
+          <View className="flex-row items-center mb-4">
+            <Ionicons name="trophy" size={20} color="#F59E0B" />
+            <Text className={`ml-4 text-sm flex-1 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+              Raggiungi i tuoi obiettivi di risparmio
+            </Text>
           </View>
-          <View style={styles.tipItem}>
-            <Ionicons name="shield-checkmark" size={20} color={colors.info} />
-            <Text style={styles.tipText}>Evita spese eccessive</Text>
+          <View className="flex-row items-center mb-4">
+            <Ionicons name="shield-checkmark" size={20} color="#3B82F6" />
+            <Text className={`ml-4 text-sm flex-1 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+              Evita spese eccessive
+            </Text>
           </View>
-          <View style={styles.tipItem}>
-            <Ionicons name="trending-up" size={20} color={colors.success} />
-            <Text style={styles.tipText}>Migliora le tue abitudini finanziarie</Text>
+          <View className="flex-row items-center">
+            <Ionicons name="trending-up" size={20} color="#10B981" />
+            <Text className={`ml-4 text-sm flex-1 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+              Migliora le tue abitudini finanziarie
+            </Text>
           </View>
         </View>
       </View>
@@ -99,7 +111,7 @@ export const BudgetList: React.FC<BudgetListProps> = ({
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         ) : undefined
       }
-      contentContainerStyle={styles.listContainer}
+      contentContainerStyle={{ padding: 16 }}
     />
   );
 };
@@ -108,9 +120,10 @@ interface BudgetCardProps {
   budget: Budget;
   status: BudgetStatus;
   onPress?: () => void;
+  isDark: boolean;
 }
 
-const BudgetCard: React.FC<BudgetCardProps> = ({ budget, status }) => {
+const BudgetCard: React.FC<BudgetCardProps> = ({ budget, status, isDark }) => {
   const getProgressColor = () => {
     if (status.isOverBudget) return '#E74C3C';
     if (status.isWarning) return '#F39C12';
@@ -148,225 +161,103 @@ const BudgetCard: React.FC<BudgetCardProps> = ({ budget, status }) => {
   };
 
   const getCategoryColor = (category: string): string => {
-    return colors.categories[category as keyof typeof colors.categories] || colors.categories.Other;
+    const categoryColors: Record<string, string> = {
+      'Food': '#FF6B6B',
+      'Transport': '#4ECDC4',
+      'Shopping': '#FFE66D',
+      'Bills': '#95E1D3',
+      'Entertainment': '#F38181',
+      'Health': '#AA96DA',
+      'Other': '#95A5A6'
+    };
+    return categoryColors[category] || categoryColors.Other;
   };
 
   const categoryIcon = getCategoryIcon(budget.category);
   const categoryColor = getCategoryColor(budget.category);
 
   return (
-    <View style={styles.card}>
+    <View className={`p-4 rounded-2xl mb-4 ${
+      isDark ? 'bg-background-card-dark shadow-lg' : 'bg-background-card-light shadow-md'
+    }`}>
       {/* Header */}
-      <View style={styles.cardHeader}>
-        <View style={styles.categoryIconWrapper}>
-          <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+      <View className="flex-row items-center mb-4">
+        <View className="mr-3">
+          <View className="w-13 h-13 rounded-xl justify-center items-center" style={{ backgroundColor: categoryColor + '20' }}>
             <Ionicons name={categoryIcon} size={28} color={categoryColor} />
           </View>
         </View>
-        <View style={styles.categoryInfo}>
-          <Text style={styles.categoryName}>{budget.category}</Text>
-          <Text style={styles.periodLabel}>{getPeriodLabel(budget.period)}</Text>
+        <View className="flex-1">
+          <Text className={`text-lg font-bold mb-1 ${
+            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+          }`}>
+            {budget.category}
+          </Text>
+          <Text className={`text-sm ${
+            isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+          }`}>
+            {getPeriodLabel(budget.period)}
+          </Text>
         </View>
-        <View style={styles.amountInfo}>
-          <Text style={[styles.spent, status.isOverBudget && styles.overBudget]}>
+        <View className="items-end">
+          <Text className={`text-xl font-bold mb-0.5 ${
+            status.isOverBudget ? 'text-error' : (isDark ? 'text-text-primary-dark' : 'text-text-primary-light')
+          }`}>
             {formatCurrency(status.spent)}
           </Text>
-          <Text style={styles.limit}>di {formatCurrency(status.limit)}</Text>
+          <Text className={`text-sm ${
+            isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+          }`}>
+            di {formatCurrency(status.limit)}
+          </Text>
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View style={styles.progressBarContainer}>
+      <View className={`h-2 rounded-sm overflow-hidden mb-4 ${
+        isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+      }`}>
         <View
-          style={[
-            styles.progressBar,
-            {
-              width: `${status.percentage}%`,
-              backgroundColor: getProgressColor()
-            }
-          ]}
+          className="h-full rounded-sm"
+          style={{
+            width: `${status.percentage}%`,
+            backgroundColor: getProgressColor()
+          }}
         />
       </View>
 
       {/* Footer */}
-      <View style={styles.cardFooter}>
-        <Text style={styles.remaining}>
+      <View className="flex-row justify-between items-center">
+        <Text className={`text-sm ${
+          isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+        }`}>
           {status.isOverBudget ? (
             <>Superato di {formatCurrency(Math.abs(status.remaining))}</>
           ) : (
             <>Rimanente: {formatCurrency(status.remaining)}</>
           )}
         </Text>
-        <Text style={[styles.percentage, { color: getProgressColor() }]}>
+        <Text className="text-base font-bold" style={{ color: getProgressColor() }}>
           {status.percentage.toFixed(0)}%
         </Text>
       </View>
 
       {/* Warning badge */}
       {status.isWarning && !status.isOverBudget && (
-        <View style={styles.warningBadge}>
-          <Text style={styles.warningText}>⚠️ Vicino al limite</Text>
+        <View className="mt-4 px-2 py-2 rounded-sm border" style={{ backgroundColor: '#F39C12' + '20', borderColor: '#F39C12' }}>
+          <Text className="text-sm text-center font-semibold" style={{ color: '#F39C12' }}>
+            ⚠️ Vicino al limite
+          </Text>
         </View>
       )}
 
       {status.isOverBudget && (
-        <View style={styles.overBudgetBadge}>
-          <Text style={styles.overBudgetText}>🚨 Budget superato</Text>
+        <View className="mt-4 px-2 py-2 rounded-sm border border-error" style={{ backgroundColor: '#EF4444' + '20' }}>
+          <Text className="text-sm text-error text-center font-semibold">
+            🚨 Budget superato
+          </Text>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xxxl
-  },
-  loadingText: {
-    marginTop: spacing.md,
-    fontSize: 16,
-    color: colors.text.secondary
-  },
-  emptyIconContainer: {
-    marginBottom: spacing.xxl
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md
-  },
-  emptySubtext: {
-    fontSize: 15,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.xxxl
-  },
-  emptyTips: {
-    width: '100%',
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.xl
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md
-  },
-  tipText: {
-    marginLeft: spacing.md,
-    fontSize: 14,
-    color: colors.text.primary,
-    flex: 1
-  },
-  listContainer: {
-    padding: spacing.lg
-  },
-  card: {
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    ...colors.shadow.md
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16
-  },
-  categoryIconWrapper: {
-    marginRight: 12
-  },
-  categoryIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  categoryInfo: {
-    flex: 1
-  },
-  categoryName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 4
-  },
-  periodLabel: {
-    fontSize: 13,
-    color: colors.text.secondary
-  },
-  amountInfo: {
-    alignItems: 'flex-end'
-  },
-  spent: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 2
-  },
-  overBudget: {
-    color: colors.error
-  },
-  limit: {
-    fontSize: 13,
-    color: colors.text.secondary
-  },
-  progressBarContainer: {
-    height: 8,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden',
-    marginBottom: spacing.md
-  },
-  progressBar: {
-    height: '100%',
-    borderRadius: borderRadius.sm
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  remaining: {
-    fontSize: 14,
-    color: colors.text.secondary
-  },
-  percentage: {
-    fontSize: 16,
-    fontWeight: '700'
-  },
-  warningBadge: {
-    marginTop: spacing.md,
-    backgroundColor: colors.warning + '20',
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.warning
-  },
-  warningText: {
-    fontSize: 13,
-    color: colors.warning,
-    textAlign: 'center',
-    fontWeight: '600'
-  },
-  overBudgetBadge: {
-    marginTop: spacing.md,
-    backgroundColor: colors.error + '20',
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    borderWidth: 1,
-    borderColor: colors.error
-  },
-  overBudgetText: {
-    fontSize: 13,
-    color: colors.error,
-    textAlign: 'center',
-    fontWeight: '600'
-  }
-});

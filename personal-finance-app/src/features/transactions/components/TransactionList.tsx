@@ -1,6 +1,6 @@
 /**
  * TransactionList Component
- * Visualizza lista di transazioni con performance ottimizzate
+ * Visualizza lista di transazioni con performance ottimizzate (Tailwind)
  */
 
 import React from 'react';
@@ -8,13 +8,12 @@ import {
   FlatList,
   View,
   Text,
-  StyleSheet,
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Transaction } from '../../../types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -29,6 +28,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   onRefresh,
   onTransactionPress
 }) => {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
   const [refreshing, setRefreshing] = React.useState(false);
 
   const handleRefresh = async () => {
@@ -43,6 +44,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     <TransactionItem
       transaction={item}
       onPress={() => onTransactionPress?.(item)}
+      isDark={isDark}
     />
   );
 
@@ -50,35 +52,45 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 
   if (loading && transactions.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Caricamento transazioni...</Text>
+      <View className="flex-1 justify-center items-center p-12">
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text className={`mt-4 text-base ${isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'}`}>
+          Caricamento transazioni...
+        </Text>
       </View>
     );
   }
 
   if (transactions.length === 0) {
     return (
-      <View style={styles.centerContainer}>
-        <View style={styles.emptyIconContainer}>
-          <Ionicons name="wallet-outline" size={80} color={colors.text.tertiary} />
+      <View className="flex-1 justify-center items-center p-12">
+        <View className="mb-8">
+          <Ionicons name="wallet-outline" size={80} color={isDark ? '#718096' : '#9CA3AF'} />
         </View>
-        <Text style={styles.emptyText}>Nessuna transazione</Text>
-        <Text style={styles.emptySubtext}>
+        <Text className={`text-2xl font-bold mb-4 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+          Nessuna transazione
+        </Text>
+        <Text className={`text-base text-center leading-6 mb-12 ${isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'}`}>
           Inizia a tracciare le tue spese e{'\n'}guadagni per avere il controllo{'\n'}delle tue finanze
         </Text>
-        <View style={styles.emptyTips}>
-          <View style={styles.tipItem}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.tipText}>Aggiungi ogni spesa giornaliera</Text>
+        <View className={`w-full rounded-xl p-6 ${isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'}`}>
+          <View className="flex-row items-center mb-4">
+            <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+            <Text className={`ml-4 text-sm flex-1 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+              Aggiungi ogni spesa giornaliera
+            </Text>
           </View>
-          <View style={styles.tipItem}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.tipText}>Categorizza per capire dove spendi</Text>
+          <View className="flex-row items-center mb-4">
+            <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+            <Text className={`ml-4 text-sm flex-1 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+              Categorizza per capire dove spendi
+            </Text>
           </View>
-          <View style={styles.tipItem}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-            <Text style={styles.tipText}>Monitora i tuoi progressi</Text>
+          <View className="flex-row items-center">
+            <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+            <Text className={`ml-4 text-sm flex-1 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+              Monitora i tuoi progressi
+            </Text>
           </View>
         </View>
       </View>
@@ -95,7 +107,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         ) : undefined
       }
-      contentContainerStyle={styles.listContainer}
+      contentContainerStyle={{ padding: 16 }}
       // Performance ottimizzazioni
       removeClippedSubviews={true}
       maxToRenderPerBatch={10}
@@ -109,9 +121,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 interface TransactionItemProps {
   transaction: Transaction;
   onPress?: () => void;
+  isDark: boolean;
 }
 
-const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress }) => {
+const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress, isDark }) => {
   const isExpense = transaction.amount < 0;
   const formattedDate = new Date(transaction.date).toLocaleDateString('it-IT', {
     day: '2-digit',
@@ -128,26 +141,34 @@ const TransactionItem: React.FC<TransactionItemProps> = ({ transaction, onPress 
   const categoryColor = getCategoryColor(transaction.category);
 
   return (
-    <View style={styles.itemContainer}>
-      <View style={styles.itemLeft}>
-        <View style={[styles.categoryIcon, { backgroundColor: categoryColor + '20' }]}>
+    <View className={`flex-row justify-between items-center p-4 rounded-xl mb-4 ${
+      isDark ? 'bg-background-card-dark shadow-lg' : 'bg-background-card-light shadow-sm'
+    }`}>
+      <View className="flex-row items-center flex-1">
+        <View className="w-12 h-12 rounded-xl mr-4 justify-center items-center" style={{ backgroundColor: categoryColor + '20' }}>
           <Ionicons name={categoryIcon} size={24} color={categoryColor} />
         </View>
-        <View style={styles.itemInfo}>
-          <Text style={styles.description} numberOfLines={1}>
+        <View className="flex-1">
+          <Text className={`text-base font-semibold mb-1 ${
+            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+          }`} numberOfLines={1}>
             {transaction.description}
           </Text>
-          <Text style={styles.metadata}>
+          <Text className={`text-sm mb-0.5 ${
+            isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+          }`}>
             {transaction.category} • {formattedDate}
           </Text>
           {transaction.merchant && (
-            <Text style={styles.merchant} numberOfLines={1}>
+            <Text className={`text-xs ${
+              isDark ? 'text-text-tertiary-dark' : 'text-text-tertiary-light'
+            }`} numberOfLines={1}>
               {transaction.merchant}
             </Text>
           )}
         </View>
       </View>
-      <Text style={[styles.amount, isExpense ? styles.expense : styles.income]}>
+      <Text className={`text-lg font-bold ml-4 ${isExpense ? 'text-error' : 'text-success'}`}>
         {isExpense ? '-' : '+'}{formattedAmount}
       </Text>
     </View>
@@ -171,107 +192,15 @@ const getCategoryIcon = (category: string): any => {
 
 // Helper per colori categorie
 const getCategoryColor = (category: string): string => {
-  return colors.categories[category as keyof typeof colors.categories] || colors.categories.Other;
+  const categoryColors: Record<string, string> = {
+    'Food': '#FF6B6B',
+    'Transport': '#4ECDC4',
+    'Shopping': '#FFE66D',
+    'Bills': '#95E1D3',
+    'Entertainment': '#F38181',
+    'Health': '#AA96DA',
+    'Income': '#10B981',
+    'Other': '#95A5A6'
+  };
+  return categoryColors[category] || categoryColors.Other;
 };
-
-const styles = StyleSheet.create({
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xxxl
-  },
-  loadingText: {
-    marginTop: spacing.md,
-    fontSize: 16,
-    color: colors.text.secondary
-  },
-  emptyIconContainer: {
-    marginBottom: spacing.xxl
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md
-  },
-  emptySubtext: {
-    fontSize: 15,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.xxxl
-  },
-  emptyTips: {
-    width: '100%',
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.xl
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.md
-  },
-  tipText: {
-    marginLeft: spacing.md,
-    fontSize: 14,
-    color: colors.text.primary,
-    flex: 1
-  },
-  listContainer: {
-    padding: spacing.lg
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.background.card,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    ...colors.shadow.sm
-  },
-  itemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1
-  },
-  categoryIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    marginRight: spacing.md,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  itemInfo: {
-    flex: 1
-  },
-  description: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 4
-  },
-  metadata: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    marginBottom: 2
-  },
-  merchant: {
-    fontSize: 12,
-    color: colors.text.tertiary
-  },
-  amount: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginLeft: spacing.md
-  },
-  expense: {
-    color: colors.error
-  },
-  income: {
-    color: colors.success
-  }
-});
