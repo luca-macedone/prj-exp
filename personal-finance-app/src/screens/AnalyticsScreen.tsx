@@ -8,8 +8,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
-  Modal
+  ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -333,19 +332,11 @@ export const AnalyticsScreen: React.FC = () => {
       )}
 
       {/* Dashboard */}
-      <AnalyticsDashboard data={data} loading={loading} />
+      {!showFilters && <AnalyticsDashboard data={data} loading={loading} />}
 
-      {/* Filters Modal */}
-      <Modal
-        visible={showFilters}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setShowFilters(false)}
-      >
-        <SafeAreaView
-          className={`flex-1 ${isDark ? 'bg-background-primary-dark' : 'bg-background-primary-light'}`}
-          edges={['top', 'left', 'right', 'bottom']}
-        >
+      {/* Filters Panel - Conditional render instead of Modal */}
+      {showFilters && (
+        <View className={`absolute inset-0 pt-12 ${isDark ? 'bg-background-primary-dark' : 'bg-background-primary-light'}`}>
           <View className={`flex-row justify-between items-center px-4 py-3 border-b ${
             isDark ? 'border-border-dark' : 'border-border-light'
           }`}>
@@ -668,8 +659,8 @@ export const AnalyticsScreen: React.FC = () => {
               </Text>
             </TouchableOpacity>
           </View>
-        </SafeAreaView>
-      </Modal>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
