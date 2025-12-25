@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AuthService from '../../services/authentication/AuthService';
-import * as SecureStore from 'expo-secure-store';
 
 interface UnlockScreenProps {
   onSuccess: () => void;
@@ -33,9 +32,9 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({ onSuccess, onChangeU
   }, []);
 
   const loadUserEmail = async () => {
-    const email = await SecureStore.getItemAsync('user_email');
-    if (email) {
-      setUserEmail(email);
+    const currentUser = await AuthService.getCurrentUser();
+    if (currentUser) {
+      setUserEmail(currentUser.email);
     }
   };
 
