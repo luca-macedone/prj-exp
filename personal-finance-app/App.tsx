@@ -29,7 +29,7 @@ import SecureDatabase from './src/services/storage/SecureDatabase';
 import AuthService from './src/services/authentication/AuthService';
 import { DataProvider } from './src/context/DataContext';
 import { DeveloperMenu } from './src/components/DeveloperMenu';
-import { ThemeProvider } from 'src/context/ThemeContext';
+import { ThemeProvider } from './src/context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 

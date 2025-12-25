@@ -5,12 +5,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Appearance } from 'react-native';
+import { Theme, darkTheme, lightTheme } from '../theme/themes';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
   mode: ThemeMode;
   isDark: boolean;
+  theme: Theme;
   setMode: (mode: ThemeMode) => void;
 }
 
@@ -22,6 +24,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Determina se il tema è dark
   const isDark = mode === 'dark' || (mode === 'system' && systemColorScheme === 'dark');
+
+  // Seleziona il tema corrente
+  const theme = isDark ? darkTheme : lightTheme;
 
   // Carica preferenza salvata
   useEffect(() => {
@@ -58,7 +63,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ThemeContext.Provider value={{ mode, isDark, setMode }}>
+    <ThemeContext.Provider value={{ mode, isDark, theme, setMode }}>
       {children}
     </ThemeContext.Provider>
   );

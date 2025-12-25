@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 
 interface Notification {
@@ -26,7 +26,13 @@ interface Notification {
 
 export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { budgets, transactions } = useData();
+  const { theme } = useTheme();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+
+  // Usa i colori dal tema corrente
+  const colors = theme.colors;
+  const spacing = theme.spacing;
+  const borderRadius = theme.borderRadius;
 
   // Genera notifiche basate sui dati reali
   const notifications = useMemo((): Notification[] => {
@@ -117,6 +123,8 @@ export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose
     if (hours > 0) return `${hours}h fa`;
     return 'Ora';
   };
+
+  const styles = createStyles(colors, spacing, borderRadius);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -209,7 +217,7 @@ export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any, spacing: any, borderRadius: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary

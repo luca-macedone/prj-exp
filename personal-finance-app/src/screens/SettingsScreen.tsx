@@ -14,16 +14,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 
 export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { mode, setMode } = useTheme();
+  const { mode, setMode, theme } = useTheme();
   const { resetDatabase, seedDatabase } = useData();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [budgetAlerts, setBudgetAlerts] = useState(true);
   const [monthlyReport, setMonthlyReport] = useState(false);
+
+  // Usa i colori dal tema corrente
+  const colors = theme.colors;
+  const spacing = theme.spacing;
+  const borderRadius = theme.borderRadius;
 
   const handleThemeChange = (newMode: 'light' | 'dark' | 'system') => {
     setMode(newMode);
@@ -50,6 +54,8 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
   const handleExportData = () => {
     Alert.alert('Info', 'Funzione di export in sviluppo');
   };
+
+  const styles = createStyles(colors, spacing, borderRadius);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -299,7 +305,7 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any, spacing: any, borderRadius: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary
