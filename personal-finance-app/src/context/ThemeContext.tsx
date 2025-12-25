@@ -1,10 +1,10 @@
 /**
- * ThemeContext - Gestione tema light/dark
+ * ThemeContext - Gestione tema light/dark con NativeWind
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Appearance } from 'react-native';
+import { Appearance, useColorScheme } from 'react-native';
 import { Theme, darkTheme, lightTheme } from '../theme/themes';
 
 type ThemeMode = 'light' | 'dark' | 'system';
@@ -13,6 +13,7 @@ interface ThemeContextType {
   mode: ThemeMode;
   isDark: boolean;
   theme: Theme;
+  colorScheme: 'light' | 'dark';
   setMode: (mode: ThemeMode) => void;
 }
 
@@ -20,10 +21,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setModeState] = useState<ThemeMode>('dark');
-  const [systemColorScheme, setSystemColorScheme] = useState(Appearance.getColorScheme());
+  const systemColorScheme = useColorScheme();
 
   // Determina se il tema è dark
   const isDark = mode === 'dark' || (mode === 'system' && systemColorScheme === 'dark');
+
+  // Color scheme per NativeWind
+  const colorScheme: 'light' | 'dark' = isDark ? 'dark' : 'light';
 
   // Seleziona il tema corrente
   const theme = isDark ? darkTheme : lightTheme;
@@ -31,15 +35,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Carica preferenza salvata
   useEffect(() => {
     loadThemePreference();
-  }, []);
-
-  // Ascolta cambiamenti tema di sistema
-  useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setSystemColorScheme(colorScheme);
-    });
-
-    return () => subscription.remove();
   }, []);
 
   const loadThemePreference = async () => {
@@ -63,7 +58,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ThemeContext.Provider value={{ mode, isDark, theme, setMode }}>
+    <ThemeContext.Provider value={{ mode, isDark, theme, colorScheme, setMode }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -1,19 +1,13 @@
 /**
- * HomeScreen - Dashboard principale
+ * HomeScreen - Dashboard principale con Tailwind/NativeWind
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius, typography } from '../theme';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { QuickTransactionForm } from '../components/QuickTransactionForm';
 import { SettingsScreen } from './SettingsScreen';
@@ -21,10 +15,13 @@ import { NotificationsScreen } from './NotificationsScreen';
 
 export const HomeScreen: React.FC = () => {
   const { transactions, addTransaction } = useData();
+  const { colorScheme } = useTheme();
   const navigation = useNavigation();
   const [quickAddVisible, setQuickAddVisible] = React.useState(false);
   const [settingsVisible, setSettingsVisible] = React.useState(false);
   const [notificationsVisible, setNotificationsVisible] = React.useState(false);
+
+  const isDark = colorScheme === 'dark';
 
   // Calcola il saldo totale
   const totalBalance = transactions.reduce((sum, t) => sum + t.amount, 0);
@@ -33,8 +30,20 @@ export const HomeScreen: React.FC = () => {
   const now = Date.now();
   const monthStart = new Date(new Date(now).setDate(1)).getTime();
   const thisMonthTransactions = transactions.filter(t => t.date >= monthStart);
-  const income = thisMonthTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-  const expenses = Math.abs(thisMonthTransactions.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0));
+
+  const monthIncome = thisMonthTransactions
+    .filter(t => t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const monthExpenses = Math.abs(
+    thisMonthTransactions
+      .filter(t => t.amount < 0)
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+
+  const savingsGoal = 1000;
+  const currentSavings = totalBalance > 0 ? Math.min(totalBalance, savingsGoal) : 0;
+  const savingsProgress = (currentSavings / savingsGoal) * 100;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -44,10 +53,13 @@ export const HomeScreen: React.FC = () => {
     }).format(amount);
   };
 
-  // Handlers per azioni rapide
-  const handleQuickAdd = () => {
-    setQuickAddVisible(true);
-  };
+  // Handlers
+  const handleQuickAdd = () => setQuickAddVisible(true);
+  const handleTransfer = () => console.log('Trasferimento non ancora implementato');
+  const handleAnalyze = () => (navigation as any).navigate('Analytics');
+  const handleMore = () => setSettingsVisible(true);
+  const handleNotifications = () => setNotificationsVisible(true);
+  const handleViewAllTransactions = () => (navigation as any).navigate('Transactions');
 
   const handleAddTransaction = async (data: {
     amount: number;
@@ -62,191 +74,237 @@ export const HomeScreen: React.FC = () => {
       accountId: 'default-account'
     });
 
-    if (result) {
-      setQuickAddVisible(false);
-    }
-  };
-
-  const handleTransfer = () => {
-    // TODO: Implementare trasferimento tra conti
-    console.log('Trasferimento non ancora implementato');
-  };
-
-  const handleAnalyze = () => {
-    (navigation as any).navigate('Analytics');
-  };
-
-  const handleMore = () => {
-    setSettingsVisible(true);
-  };
-
-  const handleNotifications = () => {
-    setNotificationsVisible(true);
-  };
-
-  const handleViewAllTransactions = () => {
-    (navigation as any).navigate('Transactions');
+    if (result) setQuickAddVisible(false);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      className={isDark ? 'flex-1 bg-background-primary-dark' : 'flex-1 bg-background-primary-light'}
+      edges={['top', 'left', 'right']}
+    >
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <View style={styles.avatar}>
-              <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
+        <View className="flex-row items-center justify-between px-4 py-6">
+          <View className="flex-row items-center">
+            <View className={`w-12 h-12 rounded-2xl items-center justify-center mr-3 ${
+              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+            }`}>
+              <Ionicons name="shield-checkmark" size={24} color="#007AFF" />
             </View>
             <View>
-              <Text style={styles.greeting}>Buongiorno,</Text>
-              <Text style={styles.userName}>Marco</Text>
+              <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
+                Buongiorno,
+              </Text>
+              <Text className={isDark ? 'text-text-primary-dark text-lg font-bold' : 'text-text-primary-light text-lg font-bold'}>
+                Marco
+              </Text>
             </View>
           </View>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton} onPress={handleNotifications}>
-              <Ionicons name="notifications-outline" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            className={`w-10 h-10 rounded-xl items-center justify-center ${
+              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+            }`}
+            onPress={handleNotifications}
+          >
+            <Ionicons
+              name="notifications-outline"
+              size={24}
+              color={isDark ? '#FFFFFF' : '#1A202C'}
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Main Balance Card */}
-        <View style={styles.balanceCard}>
-          <View style={styles.balanceHeader}>
-            <View style={styles.balanceIconWrapper}>
-              <Ionicons name="wallet" size={24} color="#FFFFFF" />
-            </View>
-            <View style={styles.balanceInfo}>
-              <Text style={styles.balanceLabel}>Saldo Totale</Text>
-              <Text style={styles.accountType}>Tutti i Conti</Text>
-            </View>
-            <TouchableOpacity style={styles.cardButton}>
-              <Ionicons name="card-outline" size={24} color={colors.text.secondary} />
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.balanceAmount}>{formatCurrency(totalBalance)}</Text>
-
-          <View style={styles.balanceFooter}>
-            <View style={styles.changeIndicator}>
-              <Ionicons name="trending-up" size={16} color={colors.success} />
-              <Text style={styles.changeText}>+5.2%</Text>
-            </View>
-            <Text style={styles.updateTime}>Aggiornato ora</Text>
-          </View>
-        </View>
-
-        {/* Quick Stats */}
-        <View style={styles.statsContainer}>
-          <View style={[styles.statCard, { backgroundColor: '#10B98120' }]}>
-            <View style={[styles.statIcon, { backgroundColor: colors.success }]}>
-              <Ionicons name="arrow-down" size={20} color="#FFFFFF" />
-            </View>
-            <Text style={styles.statLabel}>Entrate</Text>
-            <Text style={styles.statAmount}>{formatCurrency(income)}</Text>
-          </View>
-
-          <View style={[styles.statCard, { backgroundColor: '#EF444420' }]}>
-            <View style={[styles.statIcon, { backgroundColor: colors.error }]}>
-              <Ionicons name="arrow-up" size={20} color="#FFFFFF" />
-            </View>
-            <Text style={styles.statLabel}>Uscite</Text>
-            <Text style={styles.statAmount}>{formatCurrency(expenses)}</Text>
-          </View>
-        </View>
-
-        {/* Savings Goal Widget */}
-        <View style={styles.savingsCard}>
-          <View style={styles.savingsHeader}>
-            <View style={[styles.savingsIcon, { backgroundColor: colors.success + '30' }]}>
-              <Ionicons name="trending-up" size={24} color={colors.success} />
-            </View>
-            <Text style={styles.savingsTitle}>Obiettivo Risparmio</Text>
-            <TouchableOpacity>
-              <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.savingsAmount}>
-            <Text style={styles.savingsValue}>{formatCurrency(totalBalance)}</Text>
-          </View>
-
-          <View style={styles.savingsGoal}>
-            <Text style={styles.goalLabel}>Obiettivo</Text>
-            <Text style={styles.goalValue}>€5.000</Text>
-          </View>
-
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${(totalBalance / 5000) * 100}%` }]} />
+        {/* Balance Card */}
+        <View className={`mx-4 mb-6 p-6 rounded-3xl ${
+          isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-lg'
+        }`}>
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
+              Saldo Totale
+            </Text>
+            <View className="w-8 h-8 rounded-full bg-success/20 items-center justify-center">
+              <Ionicons name="trending-up" size={16} color="#10B981" />
             </View>
           </View>
 
-          <Text style={styles.progressText}>
-            {Math.round((totalBalance / 5000) * 100)}% all'obiettivo
+          <Text className={`text-4xl font-bold mb-6 ${
+            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+          }`}>
+            {formatCurrency(totalBalance)}
           </Text>
+
+          <View className="flex-row justify-between">
+            <View className="flex-1 mr-2">
+              <Text className={isDark ? 'text-text-tertiary-dark text-xs mb-1' : 'text-text-tertiary-light text-xs mb-1'}>
+                Entrate
+              </Text>
+              <Text className="text-success text-base font-semibold">
+                +{formatCurrency(monthIncome)}
+              </Text>
+            </View>
+            <View className="flex-1 ml-2">
+              <Text className={isDark ? 'text-text-tertiary-dark text-xs mb-1' : 'text-text-tertiary-light text-xs mb-1'}>
+                Spese
+              </Text>
+              <Text className="text-error text-base font-semibold">
+                -{formatCurrency(monthExpenses)}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Savings Goal */}
+        <View className={`mx-4 mb-6 p-5 rounded-2xl ${
+          isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-md'
+        }`}>
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className={`font-semibold ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Obiettivo Risparmio
+            </Text>
+            <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
+              {savingsProgress.toFixed(0)}%
+            </Text>
+          </View>
+          <View className={`h-2 rounded-full mb-2 ${
+            isDark ? 'bg-background-secondary-dark' : 'bg-gray-200'
+          }`}>
+            <View
+              className="h-full bg-primary rounded-full"
+              style={{ width: `${Math.min(savingsProgress, 100)}%` }}
+            />
+          </View>
+          <View className="flex-row justify-between">
+            <Text className={isDark ? 'text-text-tertiary-dark text-xs' : 'text-text-tertiary-light text-xs'}>
+              {formatCurrency(currentSavings)}
+            </Text>
+            <Text className={isDark ? 'text-text-tertiary-dark text-xs' : 'text-text-tertiary-light text-xs'}>
+              {formatCurrency(savingsGoal)}
+            </Text>
+          </View>
         </View>
 
         {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Azioni Rapide</Text>
-          </View>
-
-          <View style={styles.actionsGrid}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleQuickAdd}>
-              <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
-                <Ionicons name="add" size={24} color={colors.primary} />
+        <View className="px-4 mb-6">
+          <Text className={`text-base font-bold mb-4 ${
+            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+          }`}>
+            Azioni Rapide
+          </Text>
+          <View className="flex-row flex-wrap justify-between">
+            <TouchableOpacity
+              className="w-[48%] mb-3"
+              onPress={handleQuickAdd}
+            >
+              <View className={`items-center p-4 rounded-2xl ${
+                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+              }`}>
+                <View className="w-14 h-14 rounded-2xl bg-primary/20 items-center justify-center mb-2">
+                  <Ionicons name="add" size={28} color="#007AFF" />
+                </View>
+                <Text className={`text-sm font-semibold ${
+                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                }`}>
+                  Aggiungi
+                </Text>
               </View>
-              <Text style={styles.actionLabel}>Aggiungi</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton} onPress={handleTransfer}>
-              <View style={[styles.actionIcon, { backgroundColor: colors.warning + '20' }]}>
-                <Ionicons name="swap-horizontal" size={24} color={colors.warning} />
+            <TouchableOpacity
+              className="w-[48%] mb-3"
+              onPress={handleTransfer}
+            >
+              <View className={`items-center p-4 rounded-2xl ${
+                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+              }`}>
+                <View className="w-14 h-14 rounded-2xl bg-warning/20 items-center justify-center mb-2">
+                  <Ionicons name="swap-horizontal" size={28} color="#F59E0B" />
+                </View>
+                <Text className={`text-sm font-semibold ${
+                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                }`}>
+                  Trasferisci
+                </Text>
               </View>
-              <Text style={styles.actionLabel}>Trasferisci</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton} onPress={handleAnalyze}>
-              <View style={[styles.actionIcon, { backgroundColor: colors.success + '20' }]}>
-                <Ionicons name="stats-chart" size={24} color={colors.success} />
+            <TouchableOpacity
+              className="w-[48%] mb-3"
+              onPress={handleAnalyze}
+            >
+              <View className={`items-center p-4 rounded-2xl ${
+                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+              }`}>
+                <View className="w-14 h-14 rounded-2xl bg-success/20 items-center justify-center mb-2">
+                  <Ionicons name="stats-chart" size={28} color="#10B981" />
+                </View>
+                <Text className={`text-sm font-semibold ${
+                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                }`}>
+                  Analizza
+                </Text>
               </View>
-              <Text style={styles.actionLabel}>Analizza</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton} onPress={handleMore}>
-              <View style={[styles.actionIcon, { backgroundColor: colors.info + '20' }]}>
-                <Ionicons name="settings" size={24} color={colors.info} />
+            <TouchableOpacity
+              className="w-[48%] mb-3"
+              onPress={handleMore}
+            >
+              <View className={`items-center p-4 rounded-2xl ${
+                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+              }`}>
+                <View className="w-14 h-14 rounded-2xl bg-info/20 items-center justify-center mb-2">
+                  <Ionicons name="settings" size={28} color="#3B82F6" />
+                </View>
+                <Text className={`text-sm font-semibold ${
+                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                }`}>
+                  Altro
+                </Text>
               </View>
-              <Text style={styles.actionLabel}>Altro</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Recent Transactions Preview */}
-        <View style={styles.recentSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Transazioni Recenti</Text>
+        {/* Recent Transactions */}
+        <View className="px-4 mb-6">
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className={`text-base font-bold ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Transazioni Recenti
+            </Text>
             <TouchableOpacity onPress={handleViewAllTransactions}>
-              <Text style={styles.seeAll}>Vedi tutte</Text>
+              <Text className="text-primary text-sm font-semibold">Vedi tutte</Text>
             </TouchableOpacity>
           </View>
 
           {transactions.slice(0, 3).map((transaction) => (
-            <View key={transaction.id} style={styles.transactionItem}>
-              <View style={[styles.transactionIcon, { backgroundColor: colors.categories.Food + '20' }]}>
-                <Ionicons name="restaurant" size={20} color={colors.categories.Food} />
+            <View
+              key={transaction.id}
+              className={`flex-row items-center justify-between p-4 rounded-2xl mb-3 ${
+                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+              }`}
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="w-12 h-12 rounded-2xl bg-category-food/20 items-center justify-center mr-3">
+                  <Ionicons name="restaurant" size={20} color="#FF6B6B" />
+                </View>
+                <View className="flex-1">
+                  <Text className={`font-semibold ${
+                    isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
+                    {transaction.description}
+                  </Text>
+                  <Text className={isDark ? 'text-text-tertiary-dark text-xs' : 'text-text-tertiary-light text-xs'}>
+                    {transaction.category}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.transactionInfo}>
-                <Text style={styles.transactionName}>{transaction.description}</Text>
-                <Text style={styles.transactionDate}>
-                  {new Date(transaction.date).toLocaleDateString('it-IT')}
-                </Text>
-              </View>
-              <Text style={[
-                styles.transactionAmount,
-                transaction.amount < 0 ? styles.expenseAmount : styles.incomeAmount
-              ]}>
+              <Text className={`text-base font-bold ${
+                transaction.amount < 0 ? 'text-error' : 'text-success'
+              }`}>
                 {transaction.amount < 0 ? '-' : '+'}
                 {formatCurrency(Math.abs(transaction.amount))}
               </Text>
@@ -255,327 +313,24 @@ export const HomeScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* Quick Transaction Form */}
+      {/* Modals */}
       <QuickTransactionForm
         visible={quickAddVisible}
         onClose={() => setQuickAddVisible(false)}
         onSubmit={handleAddTransaction}
       />
 
-      {/* Settings Modal */}
       {settingsVisible && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <View className="absolute top-0 left-0 right-0 bottom-0">
           <SettingsScreen onClose={() => setSettingsVisible(false)} />
         </View>
       )}
 
-      {/* Notifications Modal */}
       {notificationsVisible && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <View className="absolute top-0 left-0 right-0 bottom-0">
           <NotificationsScreen onClose={() => setNotificationsVisible(false)} />
         </View>
       )}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xl
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.primary + '20',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md
-  },
-  greeting: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: 2
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: spacing.md
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  balanceCard: {
-    backgroundColor: colors.background.card,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    padding: spacing.xl,
-    borderRadius: borderRadius.lg,
-    ...colors.shadow.md
-  },
-  balanceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg
-  },
-  balanceIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md
-  },
-  balanceInfo: {
-    flex: 1
-  },
-  balanceLabel: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: 2
-  },
-  accountType: {
-    fontSize: 12,
-    color: colors.text.tertiary
-  },
-  cardButton: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  balanceAmount: {
-    fontSize: 40,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md
-  },
-  balanceFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  changeIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.success + '20',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm
-  },
-  changeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.success,
-    marginLeft: 4
-  },
-  updateTime: {
-    fontSize: 12,
-    color: colors.text.tertiary
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
-    marginBottom: spacing.lg
-  },
-  statCard: {
-    flex: 1,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    ...colors.shadow.sm
-  },
-  statIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.sm
-  },
-  statLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    marginBottom: 4
-  },
-  statAmount: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  savingsCard: {
-    backgroundColor: colors.background.card,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    padding: spacing.xl,
-    borderRadius: borderRadius.lg,
-    ...colors.shadow.md
-  },
-  savingsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg
-  },
-  savingsIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md
-  },
-  savingsTitle: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary
-  },
-  savingsAmount: {
-    marginBottom: spacing.md
-  },
-  savingsValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: colors.success
-  },
-  savingsGoal: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md
-  },
-  goalLabel: {
-    fontSize: 14,
-    color: colors.text.secondary
-  },
-  goalValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary
-  },
-  progressContainer: {
-    marginBottom: spacing.sm
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.sm,
-    overflow: 'hidden'
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.success,
-    borderRadius: borderRadius.sm
-  },
-  progressText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'center'
-  },
-  quickActions: {
-    marginBottom: spacing.lg
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  seeAll: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '600'
-  },
-  actionsGrid: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md
-  },
-  actionButton: {
-    flex: 1,
-    alignItems: 'center'
-  },
-  actionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.sm
-  },
-  actionLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'center'
-  },
-  recentSection: {
-    paddingBottom: spacing.xl
-  },
-  transactionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md
-  },
-  transactionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md
-  },
-  transactionInfo: {
-    flex: 1
-  },
-  transactionName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 2
-  },
-  transactionDate: {
-    fontSize: 13,
-    color: colors.text.secondary
-  },
-  transactionAmount: {
-    fontSize: 16,
-    fontWeight: '700'
-  },
-  expenseAmount: {
-    color: colors.error
-  },
-  incomeAmount: {
-    color: colors.success
-  }
-});
