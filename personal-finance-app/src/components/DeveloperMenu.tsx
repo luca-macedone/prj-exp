@@ -109,15 +109,16 @@ export const DeveloperMenu: React.FC = () => {
 
   return (
     <>
-      {/* Developer Icon - Long press to open */}
+      {/* Developer Icon - Click or Long press to open */}
       <TouchableOpacity
         className="absolute top-[50px] left-4 w-8 h-8 rounded-full justify-center items-center z-[1000] border"
         style={{
           backgroundColor: '#F59E0B20',
           borderColor: '#F59E0B40'
         }}
+        onPress={() => setVisible(true)}
         onLongPress={() => setVisible(true)}
-        delayLongPress={1000}
+        delayLongPress={500}
       >
         <Ionicons name="bug" size={16} color="#F59E0B" />
       </TouchableOpacity>

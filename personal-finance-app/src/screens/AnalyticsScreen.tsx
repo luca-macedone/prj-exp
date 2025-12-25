@@ -19,23 +19,50 @@ import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 
 type PeriodType = 'week' | 'month' | 'year' | 'custom';
+type TransactionType = 'all' | 'income' | 'expense';
 
 export const AnalyticsScreen: React.FC = () => {
   const [period, setPeriod] = useState<PeriodType>('month');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<TransactionType>('all');
+  const [minAmount, setMinAmount] = useState<number | null>(null);
+  const [maxAmount, setMaxAmount] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const { transactions, loading: dataLoading } = useData();
   const { colorScheme } = useTheme();
   const isDark = colorScheme === 'dark';
 
-  // Filtra transazioni per categoria se selezionata
+  // Filtra transazioni per categoria, tipo e importo
   const filteredTransactions = useMemo(() => {
-    if (!selectedCategory) return transactions;
-    return transactions.filter(t => t.category === selectedCategory);
-  }, [transactions, selectedCategory]);
+    let filtered = transactions;
+
+    // Filtro per categoria
+    if (selectedCategory) {
+      filtered = filtered.filter(t => t.category === selectedCategory);
+    }
+
+    // Filtro per tipo (income/expense)
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(t =>
+        selectedType === 'income' ? t.type === 'income' : t.type === 'expense'
+      );
+    }
+
+    // Filtro per importo minimo
+    if (minAmount !== null) {
+      filtered = filtered.filter(t => Math.abs(t.amount) >= minAmount);
+    }
+
+    // Filtro per importo massimo
+    if (maxAmount !== null) {
+      filtered = filtered.filter(t => Math.abs(t.amount) <= maxAmount);
+    }
+
+    return filtered;
+  }, [transactions, selectedCategory, selectedType, minAmount, maxAmount]);
 
   // Modifica le transazioni se selezione mese/anno custom
   const customFilteredTransactions = useMemo(() => {
@@ -87,6 +114,9 @@ export const AnalyticsScreen: React.FC = () => {
     let count = 0;
     if (selectedCategory) count++;
     if (period === 'custom') count++;
+    if (selectedType !== 'all') count++;
+    if (minAmount !== null) count++;
+    if (maxAmount !== null) count++;
     return count;
   };
 
@@ -228,7 +258,7 @@ export const AnalyticsScreen: React.FC = () => {
       </View>
 
       {/* Active Filters */}
-      {(selectedCategory || period === 'custom') && (
+      {(selectedCategory || period === 'custom' || selectedType !== 'all' || minAmount !== null || maxAmount !== null) && (
         <View className="pb-3">
           <ScrollView
             horizontal
@@ -253,6 +283,39 @@ export const AnalyticsScreen: React.FC = () => {
                   {months[selectedMonth]} {selectedYear}
                 </Text>
                 <TouchableOpacity onPress={() => setPeriod('month')}>
+                  <Ionicons name="close-circle" size={16} color="#007AFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+            {selectedType !== 'all' && (
+              <View className="flex-row items-center gap-1 bg-primary/20 px-3 py-2 rounded-full border border-primary">
+                <Ionicons name={selectedType === 'income' ? 'arrow-down' : 'arrow-up'} size={14} color="#007AFF" />
+                <Text className="text-[13px] font-semibold text-primary">
+                  {selectedType === 'income' ? 'Entrate' : 'Spese'}
+                </Text>
+                <TouchableOpacity onPress={() => setSelectedType('all')}>
+                  <Ionicons name="close-circle" size={16} color="#007AFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+            {minAmount !== null && (
+              <View className="flex-row items-center gap-1 bg-primary/20 px-3 py-2 rounded-full border border-primary">
+                <Ionicons name="chevron-up" size={14} color="#007AFF" />
+                <Text className="text-[13px] font-semibold text-primary">
+                  Min €{minAmount}
+                </Text>
+                <TouchableOpacity onPress={() => setMinAmount(null)}>
+                  <Ionicons name="close-circle" size={16} color="#007AFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+            {maxAmount !== null && (
+              <View className="flex-row items-center gap-1 bg-primary/20 px-3 py-2 rounded-full border border-primary">
+                <Ionicons name="chevron-down" size={14} color="#007AFF" />
+                <Text className="text-[13px] font-semibold text-primary">
+                  Max €{maxAmount}
+                </Text>
+                <TouchableOpacity onPress={() => setMaxAmount(null)}>
                   <Ionicons name="close-circle" size={16} color="#007AFF" />
                 </TouchableOpacity>
               </View>
@@ -306,6 +369,167 @@ export const AnalyticsScreen: React.FC = () => {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Tipo di Transazione */}
+            <View className="px-4 pt-6">
+              <Text className={`text-base font-bold mb-3 ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Tipo di Transazione
+              </Text>
+              <View className="flex-row gap-2">
+                <TouchableOpacity
+                  className={`flex-1 py-3 rounded-xl items-center border-[1.5px] ${
+                    selectedType === 'all'
+                      ? 'bg-primary/20 border-primary'
+                      : isDark
+                        ? 'bg-background-card-dark border-transparent'
+                        : 'bg-background-card-light border-transparent shadow-sm'
+                  }`}
+                  onPress={() => setSelectedType('all')}
+                >
+                  <Ionicons
+                    name="apps"
+                    size={20}
+                    color={selectedType === 'all' ? '#007AFF' : (isDark ? '#A0AEC0' : '#6B7280')}
+                  />
+                  <Text className={`text-[13px] font-semibold mt-1 ${
+                    selectedType === 'all'
+                      ? 'text-primary'
+                      : isDark
+                        ? 'text-text-secondary-dark'
+                        : 'text-text-secondary-light'
+                  }`}>
+                    Tutte
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 py-3 rounded-xl items-center border-[1.5px] ${
+                    selectedType === 'income'
+                      ? 'bg-success/20 border-success'
+                      : isDark
+                        ? 'bg-background-card-dark border-transparent'
+                        : 'bg-background-card-light border-transparent shadow-sm'
+                  }`}
+                  onPress={() => setSelectedType('income')}
+                >
+                  <Ionicons
+                    name="arrow-down"
+                    size={20}
+                    color={selectedType === 'income' ? '#10B981' : (isDark ? '#A0AEC0' : '#6B7280')}
+                  />
+                  <Text className={`text-[13px] font-semibold mt-1 ${
+                    selectedType === 'income'
+                      ? 'text-success'
+                      : isDark
+                        ? 'text-text-secondary-dark'
+                        : 'text-text-secondary-light'
+                  }`}>
+                    Entrate
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 py-3 rounded-xl items-center border-[1.5px] ${
+                    selectedType === 'expense'
+                      ? 'bg-error/20 border-error'
+                      : isDark
+                        ? 'bg-background-card-dark border-transparent'
+                        : 'bg-background-card-light border-transparent shadow-sm'
+                  }`}
+                  onPress={() => setSelectedType('expense')}
+                >
+                  <Ionicons
+                    name="arrow-up"
+                    size={20}
+                    color={selectedType === 'expense' ? '#EF4444' : (isDark ? '#A0AEC0' : '#6B7280')}
+                  />
+                  <Text className={`text-[13px] font-semibold mt-1 ${
+                    selectedType === 'expense'
+                      ? 'text-error'
+                      : isDark
+                        ? 'text-text-secondary-dark'
+                        : 'text-text-secondary-light'
+                  }`}>
+                    Spese
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Range Importo */}
+            <View className="px-4 pt-6">
+              <Text className={`text-base font-bold mb-3 ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Range Importo (€)
+              </Text>
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <Text className={`text-sm font-semibold mb-2 ${
+                    isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                  }`}>
+                    Minimo
+                  </Text>
+                  <View className="flex-row gap-2">
+                    {[10, 50, 100, 500].map((amount) => (
+                      <TouchableOpacity
+                        key={amount}
+                        className={`flex-1 py-2.5 rounded-lg items-center border-[1.5px] ${
+                          minAmount === amount
+                            ? 'bg-primary/20 border-primary'
+                            : isDark
+                              ? 'bg-background-card-dark border-transparent'
+                              : 'bg-background-card-light border-transparent shadow-sm'
+                        }`}
+                        onPress={() => setMinAmount(minAmount === amount ? null : amount)}
+                      >
+                        <Text className={`text-xs font-semibold ${
+                          minAmount === amount
+                            ? 'text-primary'
+                            : isDark
+                              ? 'text-text-secondary-dark'
+                              : 'text-text-secondary-light'
+                        }`}>
+                          {amount}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                <View className="flex-1">
+                  <Text className={`text-sm font-semibold mb-2 ${
+                    isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                  }`}>
+                    Massimo
+                  </Text>
+                  <View className="flex-row gap-2">
+                    {[100, 500, 1000, 5000].map((amount) => (
+                      <TouchableOpacity
+                        key={amount}
+                        className={`flex-1 py-2.5 rounded-lg items-center border-[1.5px] ${
+                          maxAmount === amount
+                            ? 'bg-primary/20 border-primary'
+                            : isDark
+                              ? 'bg-background-card-dark border-transparent'
+                              : 'bg-background-card-light border-transparent shadow-sm'
+                        }`}
+                        onPress={() => setMaxAmount(maxAmount === amount ? null : amount)}
+                      >
+                        <Text className={`text-xs font-semibold ${
+                          maxAmount === amount
+                            ? 'text-primary'
+                            : isDark
+                              ? 'text-text-secondary-dark'
+                              : 'text-text-secondary-light'
+                        }`}>
+                          {amount >= 1000 ? `${amount/1000}k` : amount}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            </View>
+
             {/* Selezione Mese */}
             <View className="px-4 pt-6">
               <Text className={`text-base font-bold mb-3 ${
@@ -422,6 +646,9 @@ export const AnalyticsScreen: React.FC = () => {
               onPress={() => {
                 setPeriod('month');
                 setSelectedCategory(null);
+                setSelectedType('all');
+                setMinAmount(null);
+                setMaxAmount(null);
                 setSelectedMonth(new Date().getMonth());
                 setSelectedYear(new Date().getFullYear());
               }}

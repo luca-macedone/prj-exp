@@ -90,19 +90,27 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     legendFontSize: 13
   }));
 
-  // Dati per Line Chart
+  // Dati per Line Chart con label ottimizzate
   const lineData = {
-    labels: data.trendData.map(t => t.date),
+    // Mostra solo ogni 2a o 3a label per evitare sovrapposizioni
+    labels: data.trendData.map((t, index) => {
+      // Mostra solo alcune date per evitare sovrapposizione
+      const step = Math.ceil(data.trendData.length / 6);
+      if (index % step === 0 || index === data.trendData.length - 1) {
+        return t.date;
+      }
+      return '';
+    }),
     datasets: [
       {
         data: data.trendData.map(t => t.expenses),
         color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`, // colors.error
-        strokeWidth: 3
+        strokeWidth: 2.5
       },
       {
         data: data.trendData.map(t => t.income),
         color: (opacity = 1) => `rgba(16, 185, 129, ${opacity})`, // colors.success
-        strokeWidth: 3
+        strokeWidth: 2.5
       }
     ],
     legend: ['Spese', 'Entrate']
@@ -229,37 +237,52 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </Text>
             </View>
           </View>
-          <LineChart
-            data={lineData}
-            width={screenWidth - 64}
-            height={220}
-            chartConfig={{
-              backgroundColor: 'transparent',
-              backgroundGradientFrom: isDark ? '#1A202C' : '#FFFFFF',
-              backgroundGradientTo: isDark ? '#1A202C' : '#FFFFFF',
-              decimalPlaces: 0,
-              color: (opacity = 1) => isDark ? `rgba(160, 174, 192, ${opacity})` : `rgba(107, 114, 128, ${opacity})`,
-              labelColor: (opacity = 1) => isDark ? '#A0AEC0' : '#6B7280',
-              style: {
-                borderRadius: 16
-              },
-              propsForDots: {
-                r: 5,
-                strokeWidth: 2,
-                stroke: isDark ? '#1A202C' : '#FFFFFF'
-              },
-              propsForBackgroundLines: {
-                strokeDasharray: '',
-                stroke: isDark ? '#2D3748' : '#E5E7EB',
-                strokeWidth: 1
-              }
-            }}
-            bezier
-            style={{ marginVertical: 8, borderRadius: 16 }}
-            withShadow={false}
-            withInnerLines={true}
-            withOuterLines={false}
-          />
+          <View className="items-center">
+            <LineChart
+              data={lineData}
+              width={screenWidth - 64}
+              height={240}
+              chartConfig={{
+                backgroundColor: 'transparent',
+                backgroundGradientFrom: isDark ? '#1A202C' : '#FFFFFF',
+                backgroundGradientTo: isDark ? '#1A202C' : '#FFFFFF',
+                decimalPlaces: 0,
+                color: (opacity = 1) => isDark ? `rgba(160, 174, 192, ${opacity})` : `rgba(107, 114, 128, ${opacity})`,
+                labelColor: (opacity = 1) => isDark ? '#A0AEC0' : '#6B7280',
+                style: {
+                  borderRadius: 16,
+                  paddingRight: 0
+                },
+                propsForDots: {
+                  r: 4,
+                  strokeWidth: 2,
+                  stroke: isDark ? '#1A202C' : '#FFFFFF'
+                },
+                propsForBackgroundLines: {
+                  strokeDasharray: '',
+                  stroke: isDark ? '#2D3748' : '#E5E7EB',
+                  strokeWidth: 1
+                },
+                propsForLabels: {
+                  fontSize: 10,
+                  fontWeight: '500'
+                }
+              }}
+              bezier
+              style={{
+                marginVertical: 12,
+                borderRadius: 16,
+                paddingRight: 0
+              }}
+              withShadow={false}
+              withInnerLines={true}
+              withOuterLines={false}
+              withHorizontalLabels={true}
+              withVerticalLabels={true}
+              fromZero
+              segments={4}
+            />
+          </View>
         </View>
       )}
     </ScrollView>
