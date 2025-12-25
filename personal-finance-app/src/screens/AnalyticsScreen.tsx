@@ -6,7 +6,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   View,
-  StyleSheet,
   Text,
   TouchableOpacity,
   ScrollView,
@@ -16,9 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AnalyticsDashboard } from '../features/analytics';
 import { useAnalytics } from '../features/analytics/hooks/useAnalytics';
-import { colors, spacing, borderRadius } from '../theme';
 import { useData } from '../context/DataContext';
-import dayjs from 'dayjs';
+import { useTheme } from '../context/ThemeContext';
 
 type PeriodType = 'week' | 'month' | 'year' | 'custom';
 
@@ -30,6 +28,8 @@ export const AnalyticsScreen: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const { transactions, loading: dataLoading } = useData();
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
 
   // Filtra transazioni per categoria se selezionata
   const filteredTransactions = useMemo(() => {
@@ -91,94 +91,137 @@ export const AnalyticsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      className={`flex-1 ${isDark ? 'bg-background-primary-dark' : 'bg-background-primary-light'}`}
+      edges={['top', 'left', 'right']}
+    >
       {/* Header */}
-      <View style={styles.header}>
+      <View className="flex-row justify-between items-center px-4 pt-3 pb-4">
         <View>
-          <Text style={styles.headerTitle}>Analytics</Text>
-          <Text style={styles.headerSubtitle}>
+          <Text className={`text-3xl font-bold mb-1 ${
+            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+          }`}>
+            Analytics
+          </Text>
+          <Text className={`text-sm ${
+            isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+          }`}>
             {period === 'custom'
               ? `${months[selectedMonth]} ${selectedYear}`
               : 'Panoramica delle tue finanze'
             }
           </Text>
         </View>
-        <View style={styles.headerButtons}>
+        <View className="flex-row gap-2">
           <TouchableOpacity
-            style={styles.headerButton}
+            className={`w-10 h-10 rounded-xl items-center justify-center relative ${
+              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+            }`}
             onPress={() => setShowFilters(true)}
           >
-            <Ionicons name="options" size={20} color={colors.text.secondary} />
+            <Ionicons
+              name="options"
+              size={20}
+              color={isDark ? '#A0AEC0' : '#4A5568'}
+            />
             {getActiveFiltersCount() > 0 && (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{getActiveFiltersCount()}</Text>
+              <View className="absolute -top-1 -right-1 bg-error rounded-full w-4.5 h-4.5 items-center justify-center">
+                <Text className="text-[10px] font-bold text-white">
+                  {getActiveFiltersCount()}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="download-outline" size={20} color={colors.text.secondary} />
+          <TouchableOpacity
+            className={`w-10 h-10 rounded-xl items-center justify-center ${
+              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+            }`}
+          >
+            <Ionicons
+              name="download-outline"
+              size={20}
+              color={isDark ? '#A0AEC0' : '#4A5568'}
+            />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Quick Period Selector */}
-      <View style={styles.periodSelector}>
+      <View className="flex-row px-4 pb-3 gap-2">
         <TouchableOpacity
-          style={[
-            styles.periodButton,
-            period === 'week' && styles.periodButtonSelected
-          ]}
+          className={`flex-1 flex-row items-center justify-center gap-1 py-3 rounded-xl border-[1.5px] ${
+            period === 'week'
+              ? 'bg-primary/20 border-primary'
+              : isDark
+                ? 'bg-background-secondary-dark border-transparent'
+                : 'bg-background-secondary-light border-transparent'
+          }`}
           onPress={() => setPeriod('week')}
         >
           <Ionicons
             name="calendar"
             size={18}
-            color={period === 'week' ? colors.primary : colors.text.secondary}
+            color={period === 'week' ? '#007AFF' : (isDark ? '#A0AEC0' : '#4A5568')}
           />
-          <Text style={[
-            styles.periodButtonText,
-            period === 'week' && styles.periodButtonTextSelected
-          ]}>
+          <Text className={`text-[13px] font-semibold ${
+            period === 'week'
+              ? 'text-primary'
+              : isDark
+                ? 'text-text-secondary-dark'
+                : 'text-text-secondary-light'
+          }`}>
             Settimana
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.periodButton,
-            (period === 'month' || period === 'custom') && styles.periodButtonSelected
-          ]}
+          className={`flex-1 flex-row items-center justify-center gap-1 py-3 rounded-xl border-[1.5px] ${
+            (period === 'month' || period === 'custom')
+              ? 'bg-primary/20 border-primary'
+              : isDark
+                ? 'bg-background-secondary-dark border-transparent'
+                : 'bg-background-secondary-light border-transparent'
+          }`}
           onPress={() => setPeriod('month')}
         >
           <Ionicons
             name="calendar-outline"
             size={18}
-            color={(period === 'month' || period === 'custom') ? colors.primary : colors.text.secondary}
+            color={(period === 'month' || period === 'custom') ? '#007AFF' : (isDark ? '#A0AEC0' : '#4A5568')}
           />
-          <Text style={[
-            styles.periodButtonText,
-            (period === 'month' || period === 'custom') && styles.periodButtonTextSelected
-          ]}>
+          <Text className={`text-[13px] font-semibold ${
+            (period === 'month' || period === 'custom')
+              ? 'text-primary'
+              : isDark
+                ? 'text-text-secondary-dark'
+                : 'text-text-secondary-light'
+          }`}>
             Mese
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.periodButton,
-            period === 'year' && styles.periodButtonSelected
-          ]}
+          className={`flex-1 flex-row items-center justify-center gap-1 py-3 rounded-xl border-[1.5px] ${
+            period === 'year'
+              ? 'bg-primary/20 border-primary'
+              : isDark
+                ? 'bg-background-secondary-dark border-transparent'
+                : 'bg-background-secondary-light border-transparent'
+          }`}
           onPress={() => setPeriod('year')}
         >
           <Ionicons
             name="calendar-number"
             size={18}
-            color={period === 'year' ? colors.primary : colors.text.secondary}
+            color={period === 'year' ? '#007AFF' : (isDark ? '#A0AEC0' : '#4A5568')}
           />
-          <Text style={[
-            styles.periodButtonText,
-            period === 'year' && styles.periodButtonTextSelected
-          ]}>
+          <Text className={`text-[13px] font-semibold ${
+            period === 'year'
+              ? 'text-primary'
+              : isDark
+                ? 'text-text-secondary-dark'
+                : 'text-text-secondary-light'
+          }`}>
             Anno
           </Text>
         </TouchableOpacity>
@@ -186,29 +229,31 @@ export const AnalyticsScreen: React.FC = () => {
 
       {/* Active Filters */}
       {(selectedCategory || period === 'custom') && (
-        <View style={styles.activeFilters}>
+        <View className="pb-3">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.activeFiltersContent}
+            contentContainerClassName="px-4 gap-2"
           >
             {selectedCategory && (
-              <View style={styles.filterChip}>
-                <Ionicons name="pricetag" size={14} color={colors.primary} />
-                <Text style={styles.filterChipText}>{selectedCategory}</Text>
+              <View className="flex-row items-center gap-1 bg-primary/20 px-3 py-2 rounded-full border border-primary">
+                <Ionicons name="pricetag" size={14} color="#007AFF" />
+                <Text className="text-[13px] font-semibold text-primary">
+                  {selectedCategory}
+                </Text>
                 <TouchableOpacity onPress={() => setSelectedCategory(null)}>
-                  <Ionicons name="close-circle" size={16} color={colors.primary} />
+                  <Ionicons name="close-circle" size={16} color="#007AFF" />
                 </TouchableOpacity>
               </View>
             )}
             {period === 'custom' && (
-              <View style={styles.filterChip}>
-                <Ionicons name="calendar" size={14} color={colors.primary} />
-                <Text style={styles.filterChipText}>
+              <View className="flex-row items-center gap-1 bg-primary/20 px-3 py-2 rounded-full border border-primary">
+                <Ionicons name="calendar" size={14} color="#007AFF" />
+                <Text className="text-[13px] font-semibold text-primary">
                   {months[selectedMonth]} {selectedYear}
                 </Text>
                 <TouchableOpacity onPress={() => setPeriod('month')}>
-                  <Ionicons name="close-circle" size={16} color={colors.primary} />
+                  <Ionicons name="close-circle" size={16} color="#007AFF" />
                 </TouchableOpacity>
               </View>
             )}
@@ -218,9 +263,9 @@ export const AnalyticsScreen: React.FC = () => {
 
       {/* Error */}
       {error && (
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={20} color={colors.warning} />
-          <Text style={styles.errorText}>{error}</Text>
+        <View className="flex-row items-center bg-warning/20 px-4 py-3 mx-4 mb-4 rounded-xl gap-2">
+          <Ionicons name="alert-circle" size={20} color="#F59E0B" />
+          <Text className="flex-1 text-warning text-sm">{error}</Text>
         </View>
       )}
 
@@ -234,35 +279,60 @@ export const AnalyticsScreen: React.FC = () => {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowFilters(false)}
       >
-        <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right', 'bottom']}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Filtri</Text>
+        <SafeAreaView
+          className={`flex-1 ${isDark ? 'bg-background-primary-dark' : 'bg-background-primary-light'}`}
+          edges={['top', 'left', 'right', 'bottom']}
+        >
+          <View className={`flex-row justify-between items-center px-4 py-3 border-b ${
+            isDark ? 'border-border-dark' : 'border-border-light'
+          }`}>
+            <Text className={`text-2xl font-bold ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Filtri
+            </Text>
             <TouchableOpacity
-              style={styles.closeButton}
+              className={`w-10 h-10 rounded-xl items-center justify-center ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}
               onPress={() => setShowFilters(false)}
             >
-              <Ionicons name="close" size={24} color={colors.text.primary} />
+              <Ionicons
+                name="close"
+                size={24}
+                color={isDark ? '#FFFFFF' : '#1A202C'}
+              />
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Selezione Mese */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Seleziona Mese</Text>
-              <View style={styles.monthGrid}>
+            <View className="px-4 pt-6">
+              <Text className={`text-base font-bold mb-3 ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Seleziona Mese
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
                 {months.map((month, index) => (
                   <TouchableOpacity
                     key={month}
-                    style={[
-                      styles.monthButton,
-                      selectedMonth === index && period === 'custom' && styles.monthButtonActive
-                    ]}
+                    className={`w-[22%] py-3 rounded-xl items-center border-[1.5px] ${
+                      selectedMonth === index && period === 'custom'
+                        ? 'bg-primary/20 border-primary'
+                        : isDark
+                          ? 'bg-background-card-dark border-transparent'
+                          : 'bg-background-card-light border-transparent shadow-sm'
+                    }`}
                     onPress={() => handleMonthSelect(index)}
                   >
-                    <Text style={[
-                      styles.monthButtonText,
-                      selectedMonth === index && period === 'custom' && styles.monthButtonTextActive
-                    ]}>
+                    <Text className={`text-[13px] font-semibold ${
+                      selectedMonth === index && period === 'custom'
+                        ? 'text-primary'
+                        : isDark
+                          ? 'text-text-secondary-dark'
+                          : 'text-text-secondary-light'
+                    }`}>
                       {month.substring(0, 3)}
                     </Text>
                   </TouchableOpacity>
@@ -271,22 +341,32 @@ export const AnalyticsScreen: React.FC = () => {
             </View>
 
             {/* Selezione Anno */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Seleziona Anno</Text>
-              <View style={styles.yearGrid}>
+            <View className="px-4 pt-6">
+              <Text className={`text-base font-bold mb-3 ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Seleziona Anno
+              </Text>
+              <View className="flex-row gap-2">
                 {years.map((year) => (
                   <TouchableOpacity
                     key={year}
-                    style={[
-                      styles.yearButton,
-                      selectedYear === year && period === 'custom' && styles.yearButtonActive
-                    ]}
+                    className={`flex-1 py-3 rounded-xl items-center border-[1.5px] ${
+                      selectedYear === year && period === 'custom'
+                        ? 'bg-primary/20 border-primary'
+                        : isDark
+                          ? 'bg-background-card-dark border-transparent'
+                          : 'bg-background-card-light border-transparent shadow-sm'
+                    }`}
                     onPress={() => handleYearSelect(year)}
                   >
-                    <Text style={[
-                      styles.yearButtonText,
-                      selectedYear === year && period === 'custom' && styles.yearButtonTextActive
-                    ]}>
+                    <Text className={`text-base font-semibold ${
+                      selectedYear === year && period === 'custom'
+                        ? 'text-primary'
+                        : isDark
+                          ? 'text-text-secondary-dark'
+                          : 'text-text-secondary-light'
+                    }`}>
                       {year}
                     </Text>
                   </TouchableOpacity>
@@ -295,24 +375,32 @@ export const AnalyticsScreen: React.FC = () => {
             </View>
 
             {/* Filtra per Categoria */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Filtra per Categoria</Text>
-              <View style={styles.categoryGrid}>
+            <View className="px-4 pt-6">
+              <Text className={`text-base font-bold mb-3 ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Filtra per Categoria
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
                 {categories.map((cat) => (
                   <TouchableOpacity
                     key={cat}
-                    style={[
-                      styles.categoryButton,
-                      (cat === 'Tutte' ? !selectedCategory : selectedCategory === cat) &&
-                        styles.categoryButtonActive
-                    ]}
+                    className={`px-4 py-3 rounded-full border-[1.5px] ${
+                      (cat === 'Tutte' ? !selectedCategory : selectedCategory === cat)
+                        ? 'bg-primary/20 border-primary'
+                        : isDark
+                          ? 'bg-background-card-dark border-transparent'
+                          : 'bg-background-card-light border-transparent shadow-sm'
+                    }`}
                     onPress={() => handleCategorySelect(cat)}
                   >
-                    <Text style={[
-                      styles.categoryButtonText,
-                      (cat === 'Tutte' ? !selectedCategory : selectedCategory === cat) &&
-                        styles.categoryButtonTextActive
-                    ]}>
+                    <Text className={`text-[13px] font-semibold ${
+                      (cat === 'Tutte' ? !selectedCategory : selectedCategory === cat)
+                        ? 'text-primary'
+                        : isDark
+                          ? 'text-text-secondary-dark'
+                          : 'text-text-secondary-light'
+                    }`}>
                       {cat}
                     </Text>
                   </TouchableOpacity>
@@ -320,13 +408,17 @@ export const AnalyticsScreen: React.FC = () => {
               </View>
             </View>
 
-            <View style={{ height: spacing.xxxl }} />
+            <View className="h-8" />
           </ScrollView>
 
           {/* Apply Button */}
-          <View style={styles.modalFooter}>
+          <View className={`flex-row gap-3 px-4 py-4 border-t ${
+            isDark ? 'border-border-dark' : 'border-border-light'
+          }`}>
             <TouchableOpacity
-              style={styles.resetButton}
+              className={`flex-1 py-3 rounded-xl items-center ${
+                isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}
               onPress={() => {
                 setPeriod('month');
                 setSelectedCategory(null);
@@ -334,13 +426,19 @@ export const AnalyticsScreen: React.FC = () => {
                 setSelectedYear(new Date().getFullYear());
               }}
             >
-              <Text style={styles.resetButtonText}>Reset Filtri</Text>
+              <Text className={`text-base font-bold ${
+                isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
+                Reset Filtri
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.applyButton}
+              className="flex-[2] py-3 bg-primary rounded-xl items-center"
               onPress={() => setShowFilters(false)}
             >
-              <Text style={styles.applyButtonText}>Applica</Text>
+              <Text className="text-base font-bold text-white">
+                Applica
+              </Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -348,269 +446,3 @@ export const AnalyticsScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 4
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  filterBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.full,
-    width: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  filterBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  },
-  periodSelector: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    gap: spacing.sm
-  },
-  periodButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 1.5,
-    borderColor: 'transparent'
-  },
-  periodButtonSelected: {
-    backgroundColor: colors.primary + '20',
-    borderColor: colors.primary
-  },
-  periodButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  periodButtonTextSelected: {
-    color: colors.primary
-  },
-  activeFilters: {
-    paddingBottom: spacing.md
-  },
-  activeFiltersContent: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.primary + '20',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.primary
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.primary
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.warning + '20',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    borderRadius: borderRadius.md,
-    gap: spacing.sm
-  },
-  errorText: {
-    flex: 1,
-    color: colors.warning,
-    fontSize: 14
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: colors.background.primary
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background.secondary
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  filterSection: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl
-  },
-  filterSectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md
-  },
-  monthGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm
-  },
-  monthButton: {
-    width: '22%',
-    paddingVertical: spacing.md,
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'transparent'
-  },
-  monthButtonActive: {
-    backgroundColor: colors.primary + '20',
-    borderColor: colors.primary
-  },
-  monthButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  monthButtonTextActive: {
-    color: colors.primary
-  },
-  yearGrid: {
-    flexDirection: 'row',
-    gap: spacing.sm
-  },
-  yearButton: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'transparent'
-  },
-  yearButtonActive: {
-    backgroundColor: colors.primary + '20',
-    borderColor: colors.primary
-  },
-  yearButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  yearButtonTextActive: {
-    color: colors.primary
-  },
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm
-  },
-  categoryButton: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.full,
-    borderWidth: 1.5,
-    borderColor: 'transparent'
-  },
-  categoryButtonActive: {
-    backgroundColor: colors.primary + '20',
-    borderColor: colors.primary
-  },
-  categoryButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  categoryButtonTextActive: {
-    color: colors.primary
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: colors.background.secondary
-  },
-  resetButton: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    alignItems: 'center'
-  },
-  resetButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  applyButton: {
-    flex: 2,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.primary,
-    borderRadius: borderRadius.md,
-    alignItems: 'center'
-  },
-  applyButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  }
-});

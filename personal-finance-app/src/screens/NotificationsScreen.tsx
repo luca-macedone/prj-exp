@@ -6,7 +6,6 @@ import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity
 } from 'react-native';
@@ -26,13 +25,9 @@ interface Notification {
 
 export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { budgets, transactions } = useData();
-  const { theme } = useTheme();
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-
-  // Usa i colori dal tema corrente
-  const colors = theme.colors;
-  const spacing = theme.spacing;
-  const borderRadius = theme.borderRadius;
 
   // Genera notifiche basate sui dati reali
   const notifications = useMemo((): Notification[] => {
@@ -104,13 +99,13 @@ export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'budget':
-        return { name: 'wallet', color: colors.warning };
+        return { name: 'wallet', color: '#F59E0B' };
       case 'transaction':
-        return { name: 'swap-horizontal', color: colors.primary };
+        return { name: 'swap-horizontal', color: '#007AFF' };
       case 'warning':
-        return { name: 'alert-circle', color: colors.error };
+        return { name: 'alert-circle', color: '#EF4444' };
       default:
-        return { name: 'information-circle', color: colors.info };
+        return { name: 'information-circle', color: '#3B82F6' };
     }
   };
 
@@ -124,50 +119,96 @@ export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose
     return 'Ora';
   };
 
-  const styles = createStyles(colors, spacing, borderRadius);
-
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      className={`flex-1 ${isDark ? 'bg-background-primary-dark' : 'bg-background-primary-light'}`}
+      edges={['top', 'left', 'right']}
+    >
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onClose} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+      <View className={`flex-row items-center justify-between px-4 py-3 border-b ${
+        isDark ? 'border-border-dark' : 'border-border-light'
+      }`}>
+        <TouchableOpacity
+          onPress={onClose}
+          className={`w-10 h-10 rounded-xl items-center justify-center ${
+            isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+          }`}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={isDark ? '#FFFFFF' : '#1A202C'}
+          />
         </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Notifiche</Text>
+
+        <View className="flex-1 flex-row items-center justify-center gap-2">
+          <Text className={`text-xl font-bold ${
+            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+          }`}>
+            Notifiche
+          </Text>
           {unreadCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{unreadCount}</Text>
+            <View className="bg-error rounded-full px-2 py-0.5 min-w-6 items-center">
+              <Text className="text-xs font-bold text-white">
+                {unreadCount}
+              </Text>
             </View>
           )}
         </View>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="checkmark-done" size={24} color={colors.text.secondary} />
+
+        <TouchableOpacity
+          className={`w-10 h-10 rounded-xl items-center justify-center ${
+            isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+          }`}
+        >
+          <Ionicons
+            name="checkmark-done"
+            size={24}
+            color={isDark ? '#A0AEC0' : '#4A5568'}
+          />
         </TouchableOpacity>
       </View>
 
       {/* Filtri */}
-      <View style={styles.filters}>
+      <View className="flex-row gap-2 px-4 py-3">
         <TouchableOpacity
-          style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
+          className={`flex-1 py-3 px-4 rounded-xl items-center ${
+            filter === 'all'
+              ? 'bg-primary'
+              : isDark
+                ? 'bg-background-secondary-dark'
+                : 'bg-background-secondary-light shadow-sm'
+          }`}
           onPress={() => setFilter('all')}
         >
-          <Text style={[
-            styles.filterButtonText,
-            filter === 'all' && styles.filterButtonTextActive
-          ]}>
+          <Text className={`text-sm font-semibold ${
+            filter === 'all'
+              ? 'text-white'
+              : isDark
+                ? 'text-text-secondary-dark'
+                : 'text-text-secondary-light'
+          }`}>
             Tutte ({notifications.length})
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.filterButton, filter === 'unread' && styles.filterButtonActive]}
+          className={`flex-1 py-3 px-4 rounded-xl items-center ${
+            filter === 'unread'
+              ? 'bg-primary'
+              : isDark
+                ? 'bg-background-secondary-dark'
+                : 'bg-background-secondary-light shadow-sm'
+          }`}
           onPress={() => setFilter('unread')}
         >
-          <Text style={[
-            styles.filterButtonText,
-            filter === 'unread' && styles.filterButtonTextActive
-          ]}>
+          <Text className={`text-sm font-semibold ${
+            filter === 'unread'
+              ? 'text-white'
+              : isDark
+                ? 'text-text-secondary-dark'
+                : 'text-text-secondary-light'
+          }`}>
             Non lette ({unreadCount})
           </Text>
         </TouchableOpacity>
@@ -176,197 +217,70 @@ export const NotificationsScreen: React.FC<{ onClose: () => void }> = ({ onClose
       {/* Lista notifiche */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredNotifications.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="notifications-off-outline" size={64} color={colors.text.tertiary} />
-            <Text style={styles.emptyTitle}>Nessuna notifica</Text>
-            <Text style={styles.emptySubtitle}>
+          <View className="flex-1 items-center justify-center py-24">
+            <Ionicons
+              name="notifications-off-outline"
+              size={64}
+              color="#718096"
+            />
+            <Text className={`text-xl font-bold mt-4 mb-1 ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Nessuna notifica
+            </Text>
+            <Text className={`text-sm ${
+              isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+            }`}>
               {filter === 'unread' ? 'Hai letto tutto!' : 'Non hai ancora notifiche'}
             </Text>
           </View>
         ) : (
-          <View style={styles.list}>
+          <View className="px-4 gap-2">
             {filteredNotifications.map((notif) => {
               const icon = getNotificationIcon(notif.type);
               return (
                 <TouchableOpacity
                   key={notif.id}
-                  style={[styles.notificationItem, !notif.read && styles.notificationItemUnread]}
+                  className={`flex-row p-4 rounded-xl ${
+                    isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+                  } ${!notif.read ? 'border-l-4 border-l-primary' : ''}`}
                 >
-                  <View style={[styles.notificationIcon, { backgroundColor: icon.color + '20' }]}>
+                  <View
+                    className="w-12 h-12 rounded-xl items-center justify-center mr-3"
+                    style={{ backgroundColor: icon.color + '20' }}
+                  >
                     <Ionicons name={icon.name as any} size={24} color={icon.color} />
                   </View>
 
-                  <View style={styles.notificationContent}>
-                    <View style={styles.notificationHeader}>
-                      <Text style={styles.notificationTitle}>{notif.title}</Text>
-                      <Text style={styles.notificationTime}>{formatTime(notif.timestamp)}</Text>
+                  <View className="flex-1">
+                    <View className="flex-row justify-between items-center mb-1">
+                      <Text className={`flex-1 text-base font-bold ${
+                        isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                      }`}>
+                        {notif.title}
+                      </Text>
+                      <Text className="text-xs text-text-tertiary-light ml-2">
+                        {formatTime(notif.timestamp)}
+                      </Text>
                     </View>
-                    <Text style={styles.notificationMessage}>{notif.message}</Text>
+                    <Text className={`text-sm leading-5 ${
+                      isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                    }`}>
+                      {notif.message}
+                    </Text>
                   </View>
 
-                  {!notif.read && <View style={styles.unreadDot} />}
+                  {!notif.read && (
+                    <View className="w-2 h-2 rounded-full bg-primary ml-2 self-center" />
+                  )}
                 </TouchableOpacity>
               );
             })}
           </View>
         )}
 
-        <View style={{ height: spacing.xxxl }} />
+        <View className="h-8" />
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const createStyles = (colors: any, spacing: any, borderRadius: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background.secondary
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  headerContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  badge: {
-    backgroundColor: colors.error,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    minWidth: 24,
-    alignItems: 'center'
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  filters: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md
-  },
-  filterButton: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.secondary,
-    alignItems: 'center'
-  },
-  filterButtonActive: {
-    backgroundColor: colors.primary
-  },
-  filterButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  filterButtonTextActive: {
-    color: '#FFFFFF'
-  },
-  list: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    backgroundColor: colors.background.card,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    ...colors.shadow.sm
-  },
-  notificationItemUnread: {
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary
-  },
-  notificationIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md
-  },
-  notificationContent: {
-    flex: 1
-  },
-  notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs
-  },
-  notificationTitle: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.text.primary
-  },
-  notificationTime: {
-    fontSize: 12,
-    color: colors.text.tertiary
-  },
-  notificationMessage: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    lineHeight: 20
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
-    marginLeft: spacing.sm,
-    alignSelf: 'center'
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xxxl * 2
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginTop: spacing.lg,
-    marginBottom: spacing.xs
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary
-  }
-});
