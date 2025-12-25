@@ -6,6 +6,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
@@ -55,7 +56,14 @@ export const HomeScreen: React.FC = () => {
 
   // Handlers
   const handleQuickAdd = () => setQuickAddVisible(true);
-  const handleTransfer = () => console.log('Trasferimento non ancora implementato');
+  const handleTransfer = () => {
+    Toast.show({
+      type: 'info',
+      text1: 'In sviluppo',
+      text2: 'Funzionalità trasferimento in arrivo! 🚧',
+      position: 'bottom',
+    });
+  };
   const handleAnalyze = () => (navigation as any).navigate('Analytics');
   const handleMore = () => setSettingsVisible(true);
   const handleNotifications = () => setNotificationsVisible(true);
@@ -66,15 +74,32 @@ export const HomeScreen: React.FC = () => {
     description: string;
     category: string;
   }) => {
-    const result = await addTransaction({
-      amount: data.amount,
-      description: data.description,
-      category: data.category,
-      date: Date.now(),
-      accountId: 'default-account'
-    });
+    try {
+      const result = await addTransaction({
+        amount: data.amount,
+        description: data.description,
+        category: data.category,
+        date: Date.now(),
+        accountId: 'default-account'
+      });
 
-    if (result) setQuickAddVisible(false);
+      if (result) {
+        setQuickAddVisible(false);
+        Toast.show({
+          type: 'success',
+          text1: 'Transazione aggiunta!',
+          text2: `${data.amount > 0 ? '+' : ''}€${Math.abs(data.amount).toFixed(2)}`,
+          position: 'bottom',
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Errore',
+        text2: 'Impossibile aggiungere la transazione',
+        position: 'bottom',
+      });
+    }
   };
 
   return (

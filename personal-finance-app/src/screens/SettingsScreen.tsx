@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 
@@ -20,6 +21,13 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
 
   const handleThemeChange = (newMode: 'light' | 'dark' | 'system') => {
     setMode(newMode);
+    Toast.show({
+      type: 'success',
+      text1: 'Tema cambiato',
+      text2: `Tema ${newMode === 'light' ? 'chiaro' : newMode === 'dark' ? 'scuro' : 'di sistema'} attivato`,
+      position: 'bottom',
+      visibilityTime: 2000,
+    });
   };
 
   const handleResetData = () => {
@@ -32,8 +40,22 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
           text: 'Reset',
           style: 'destructive',
           onPress: async () => {
-            await resetDatabase();
-            Alert.alert('✅ Completato', 'Tutti i dati sono stati cancellati');
+            try {
+              await resetDatabase();
+              Toast.show({
+                type: 'success',
+                text1: 'Completato',
+                text2: 'Tutti i dati sono stati cancellati',
+                position: 'bottom',
+              });
+            } catch (error) {
+              Toast.show({
+                type: 'error',
+                text1: 'Errore',
+                text2: 'Impossibile resettare i dati',
+                position: 'bottom',
+              });
+            }
           }
         }
       ]
@@ -41,7 +63,12 @@ export const SettingsScreen: React.FC<{ onClose: () => void }> = ({ onClose }) =
   };
 
   const handleExportData = () => {
-    Alert.alert('Info', 'Funzione di export in sviluppo');
+    Toast.show({
+      type: 'info',
+      text1: 'In sviluppo',
+      text2: 'Funzione di export in arrivo! 🚧',
+      position: 'bottom',
+    });
   };
 
   return (

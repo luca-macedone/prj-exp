@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { BudgetList } from '../features/budget';
 import { QuickBudgetForm } from '../components/QuickBudgetForm';
 import { useData } from '../context/DataContext';
@@ -76,9 +77,21 @@ export const BudgetScreen: React.FC = () => {
 
       if (result) {
         setModalVisible(false);
+        Toast.show({
+          type: 'success',
+          text1: 'Budget creato!',
+          text2: `€${data.limit} per ${data.category}`,
+          position: 'bottom',
+        });
       }
     } catch (err) {
       console.error('Errore creazione budget:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Errore',
+        text2: 'Impossibile creare il budget',
+        position: 'bottom',
+      });
     }
   };
 

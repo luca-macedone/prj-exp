@@ -21,33 +21,37 @@ module.exports = {
             dark: '#0A1628',
           },
           secondary: {
-            light: '#F7FAFC',
+            light: '#F3F4F6',
             dark: '#152039',
           },
           card: {
             light: '#FFFFFF',
             dark: '#1E2D47',
           },
+          hover: {
+            light: '#E5E7EB',
+            dark: '#1F2937',
+          },
         },
         // Text colors
         text: {
           primary: {
-            light: '#1A202C',
-            dark: '#FFFFFF',
+            light: '#111827',
+            dark: '#F9FAFB',
           },
           secondary: {
-            light: '#4A5568',
-            dark: '#A0AEC0',
+            light: '#6B7280',
+            dark: '#D1D5DB',
           },
           tertiary: {
-            light: '#718096',
-            dark: '#718096',
+            light: '#9CA3AF',
+            dark: '#9CA3AF',
           },
         },
         // Border
         border: {
-          light: '#E2E8F0',
-          dark: '#2D3748',
+          light: '#D1D5DB',
+          dark: '#374151',
         },
         // Status colors
         success: '#10B981',

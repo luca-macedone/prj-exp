@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import { TransactionList } from '../features/transactions';
 import { QuickTransactionForm } from '../components/QuickTransactionForm';
 import { useData } from '../context/DataContext';
@@ -48,9 +49,21 @@ export const TransactionsScreen: React.FC = () => {
 
       if (result) {
         setModalVisible(false);
+        Toast.show({
+          type: 'success',
+          text1: 'Transazione aggiunta!',
+          text2: `${data.amount > 0 ? '+' : ''}€${Math.abs(data.amount).toFixed(2)} - ${data.description}`,
+          position: 'bottom',
+        });
       }
     } catch (err) {
       console.error('Errore aggiunta transazione:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Errore',
+        text2: 'Impossibile aggiungere la transazione',
+        position: 'bottom',
+      });
     }
   };
 
