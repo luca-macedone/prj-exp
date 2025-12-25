@@ -1,20 +1,19 @@
 /**
  * AnalyticsDashboard Component
- * Dashboard con statistiche finanziarie e grafici
+ * Dashboard con statistiche finanziarie e grafici con Tailwind
  */
 
 import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   ActivityIndicator,
   Dimensions
 } from 'react-native';
 import { PieChart, LineChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface AnalyticsDashboardProps {
   data: {
@@ -43,24 +42,31 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   data,
   loading = false
 }) => {
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Caricamento analytics...</Text>
+      <View className="flex-1 justify-center items-center p-12">
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text className={`mt-4 text-base ${isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'}`}>
+          Caricamento analytics...
+        </Text>
       </View>
     );
   }
 
   if (!data) {
     return (
-      <View style={styles.centerContainer}>
-        <View style={styles.emptyIconContainer}>
-          <Ionicons name="analytics-outline" size={80} color={colors.text.tertiary} />
+      <View className="flex-1 justify-center items-center p-12">
+        <View className="mb-8">
+          <Ionicons name="analytics-outline" size={80} color={isDark ? '#718096' : '#9CA3AF'} />
         </View>
-        <Text style={styles.emptyText}>Nessun dato disponibile</Text>
-        <Text style={styles.emptySubtext}>
-          Aggiungi transazioni per vedere{'\\n'}le tue statistiche finanziarie
+        <Text className={`text-2xl font-bold mb-4 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'}`}>
+          Nessun dato disponibile
+        </Text>
+        <Text className={`text-base text-center leading-6 ${isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'}`}>
+          Aggiungi transazioni per vedere{'\n'}le tue statistiche finanziarie
         </Text>
       </View>
     );
@@ -80,7 +86,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     name: item.category,
     population: item.amount,
     color: item.color,
-    legendFontColor: colors.text.secondary,
+    legendFontColor: isDark ? '#A0AEC0' : '#6B7280',
     legendFontSize: 13
   }));
 
@@ -103,35 +109,44 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView className={isDark ? 'flex-1 bg-background-primary-dark' : 'flex-1 bg-background-primary-light'}>
       {/* Summary Cards */}
-      <View style={styles.summaryContainer}>
+      <View className="p-4 gap-4">
         <SummaryCard
           title="Entrate totali"
           amount={data.totalIncome}
-          color={colors.success}
+          color="#10B981"
           icon="trending-up"
+          isDark={isDark}
         />
         <SummaryCard
           title="Spese totali"
           amount={data.totalExpenses}
-          color={colors.error}
+          color="#EF4444"
           icon="trending-down"
+          isDark={isDark}
         />
         <SummaryCard
           title="Bilancio netto"
           amount={data.balance}
-          color={data.balance >= 0 ? colors.info : colors.error}
+          color={data.balance >= 0 ? '#3B82F6' : '#EF4444'}
           icon={data.balance >= 0 ? 'checkmark-circle' : 'alert-circle'}
+          isDark={isDark}
         />
       </View>
 
       {/* Spese per Categoria */}
       {pieData.length > 0 && (
-        <View style={styles.chartSection}>
-          <View style={styles.chartHeader}>
-            <Ionicons name="pie-chart" size={24} color={colors.primary} />
-            <Text style={styles.chartTitle}>Spese per Categoria</Text>
+        <View className={`mx-4 mb-4 rounded-2xl p-4 ${
+          isDark ? 'bg-background-card-dark shadow-lg' : 'bg-background-card-light shadow-md'
+        }`}>
+          <View className="flex-row items-center mb-4 gap-2">
+            <Ionicons name="pie-chart" size={24} color="#007AFF" />
+            <Text className={`text-lg font-bold flex-1 ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Spese per Categoria
+            </Text>
           </View>
           <PieChart
             data={pieData}
@@ -149,16 +164,31 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           />
 
           {/* Categoria List */}
-          <View style={styles.categoryList}>
+          <View className="mt-4">
             {data.categoryBreakdown.slice(0, 5).map((item, index) => (
-              <View key={index} style={styles.categoryItem}>
-                <View style={styles.categoryLeft}>
-                  <View style={[styles.colorDot, { backgroundColor: item.color }]} />
-                  <Text style={styles.categoryName}>{item.category}</Text>
+              <View
+                key={index}
+                className={`flex-row justify-between items-center py-4 border-b ${
+                  isDark ? 'border-background-secondary-dark' : 'border-background-secondary-light'
+                }`}
+              >
+                <View className="flex-row items-center flex-1">
+                  <View className="w-3.5 h-3.5 rounded-full mr-4" style={{ backgroundColor: item.color }} />
+                  <Text className={`text-base font-semibold ${
+                    isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
+                    {item.category}
+                  </Text>
                 </View>
-                <View style={styles.categoryRight}>
-                  <Text style={styles.categoryAmount}>{formatCurrency(item.amount)}</Text>
-                  <Text style={styles.categoryPercentage}>
+                <View className="items-end">
+                  <Text className={`text-lg font-bold ${
+                    isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
+                    {formatCurrency(item.amount)}
+                  </Text>
+                  <Text className={`text-sm font-semibold ${
+                    isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+                  }`}>
                     {item.percentage.toFixed(0)}%
                   </Text>
                 </View>
@@ -170,19 +200,33 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Trend Temporale */}
       {data.trendData.length > 0 && (
-        <View style={styles.chartSection}>
-          <View style={styles.chartHeader}>
-            <Ionicons name="stats-chart" size={24} color={colors.primary} />
-            <Text style={styles.chartTitle}>Trend Entrate vs Spese</Text>
+        <View className={`mx-4 mb-4 rounded-2xl p-4 ${
+          isDark ? 'bg-background-card-dark shadow-lg' : 'bg-background-card-light shadow-md'
+        }`}>
+          <View className="flex-row items-center mb-4 gap-2">
+            <Ionicons name="stats-chart" size={24} color="#007AFF" />
+            <Text className={`text-lg font-bold flex-1 ${
+              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
+              Trend Entrate vs Spese
+            </Text>
           </View>
-          <View style={styles.legendContainer}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
-              <Text style={styles.legendText}>Entrate</Text>
+          <View className="flex-row justify-center gap-6 mb-4">
+            <View className="flex-row items-center gap-2">
+              <View className="w-3 h-3 rounded-full bg-success" />
+              <Text className={`text-sm font-semibold ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Entrate
+              </Text>
             </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: colors.error }]} />
-              <Text style={styles.legendText}>Spese</Text>
+            <View className="flex-row items-center gap-2">
+              <View className="w-3 h-3 rounded-full bg-error" />
+              <Text className={`text-sm font-semibold ${
+                isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+              }`}>
+                Spese
+              </Text>
             </View>
           </View>
           <LineChart
@@ -191,27 +235,27 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             height={220}
             chartConfig={{
               backgroundColor: 'transparent',
-              backgroundGradientFrom: colors.background.card,
-              backgroundGradientTo: colors.background.card,
+              backgroundGradientFrom: isDark ? '#1A202C' : '#FFFFFF',
+              backgroundGradientTo: isDark ? '#1A202C' : '#FFFFFF',
               decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(160, 174, 192, ${opacity})`,
-              labelColor: (opacity = 1) => colors.text.secondary,
+              color: (opacity = 1) => isDark ? `rgba(160, 174, 192, ${opacity})` : `rgba(107, 114, 128, ${opacity})`,
+              labelColor: (opacity = 1) => isDark ? '#A0AEC0' : '#6B7280',
               style: {
-                borderRadius: borderRadius.lg
+                borderRadius: 16
               },
               propsForDots: {
                 r: 5,
                 strokeWidth: 2,
-                stroke: colors.background.card
+                stroke: isDark ? '#1A202C' : '#FFFFFF'
               },
               propsForBackgroundLines: {
                 strokeDasharray: '',
-                stroke: colors.background.secondary,
+                stroke: isDark ? '#2D3748' : '#E5E7EB',
                 strokeWidth: 1
               }
             }}
             bezier
-            style={styles.lineChart}
+            style={{ marginVertical: 8, borderRadius: 16 }}
             withShadow={false}
             withInnerLines={true}
             withOuterLines={false}
@@ -227,9 +271,10 @@ interface SummaryCardProps {
   amount: number;
   color: string;
   icon: any;
+  isDark: boolean;
 }
 
-const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, color, icon }) => {
+const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, color, icon, isDark }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
@@ -240,168 +285,22 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, amount, color, icon })
   };
 
   return (
-    <View style={styles.summaryCard}>
-      <View style={[styles.summaryIconContainer, { backgroundColor: color + '20' }]}>
+    <View className={`p-4 rounded-2xl flex-row items-center ${
+      isDark ? 'bg-background-card-dark shadow-lg' : 'bg-background-card-light shadow-md'
+    }`}>
+      <View className="w-14 h-14 rounded-xl justify-center items-center mr-4" style={{ backgroundColor: color + '20' }}>
         <Ionicons name={icon} size={28} color={color} />
       </View>
-      <View style={styles.summaryContent}>
-        <Text style={styles.summaryTitle}>{title}</Text>
-        <Text style={[styles.summaryAmount, { color }]}>
+      <View className="flex-1">
+        <Text className={`text-sm font-semibold mb-1.5 ${
+          isDark ? 'text-text-secondary-dark' : 'text-text-secondary-light'
+        }`}>
+          {title}
+        </Text>
+        <Text className="text-2xl font-bold" style={{ color }}>
           {formatCurrency(amount)}
         </Text>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xxxl
-  },
-  loadingText: {
-    marginTop: spacing.md,
-    fontSize: 16,
-    color: colors.text.secondary
-  },
-  emptyIconContainer: {
-    marginBottom: spacing.xxl
-  },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md
-  },
-  emptySubtext: {
-    fontSize: 15,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 22
-  },
-  summaryContainer: {
-    padding: spacing.lg,
-    gap: spacing.md
-  },
-  summaryCard: {
-    backgroundColor: colors.background.card,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    ...colors.shadow.md
-  },
-  summaryIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md
-  },
-  summaryContent: {
-    flex: 1
-  },
-  summaryTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    marginBottom: 6
-  },
-  summaryAmount: {
-    fontSize: 26,
-    fontWeight: '700'
-  },
-  chartSection: {
-    backgroundColor: colors.background.card,
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    borderRadius: borderRadius.lg,
-    padding: spacing.lg,
-    ...colors.shadow.md
-  },
-  chartHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-    gap: spacing.sm
-  },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
-    flex: 1
-  },
-  legendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xl,
-    marginBottom: spacing.md
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs
-  },
-  legendDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6
-  },
-  legendText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.secondary
-  },
-  lineChart: {
-    marginVertical: spacing.sm,
-    borderRadius: borderRadius.lg
-  },
-  categoryList: {
-    marginTop: spacing.lg
-  },
-  categoryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background.secondary
-  },
-  categoryLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1
-  },
-  colorDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginRight: spacing.md
-  },
-  categoryName: {
-    fontSize: 15,
-    color: colors.text.primary,
-    fontWeight: '600'
-  },
-  categoryRight: {
-    alignItems: 'flex-end'
-  },
-  categoryAmount: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: 4
-  },
-  categoryPercentage: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text.secondary
-  }
-});

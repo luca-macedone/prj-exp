@@ -9,7 +9,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import { colors } from './src/theme';
 
 // Main Screens
 import { HomeScreen } from './src/screens/HomeScreen';
@@ -28,16 +27,27 @@ import {
 // Services
 import { DataProvider } from './src/context/DataContext';
 import { DeveloperMenu } from './src/components/DeveloperMenu';
-import { ThemeProvider } from './src/context/ThemeContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Tab = createBottomTabNavigator();
 
 const AppContent: React.FC = () => {
   const { authState, setAuthState } = useAuth();
+  const { colorScheme } = useTheme();
 
   const handleAuthSuccess = () => {
     setAuthState('authenticated');
+  };
+
+  const isDark = colorScheme === 'dark';
+
+  // Theme-aware colors for Tab Navigator
+  const tabColors = {
+    background: isDark ? '#1A202C' : '#FFFFFF',
+    border: isDark ? '#2D3748' : '#E5E7EB',
+    activeTint: '#007AFF',
+    inactiveTint: isDark ? '#A0AEC0' : '#6B7280'
   };
 
   // Loading state
@@ -88,16 +98,20 @@ const AppContent: React.FC = () => {
         <Tab.Navigator
               screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: colors.text.tertiary,
+                tabBarActiveTintColor: tabColors.activeTint,
+                tabBarInactiveTintColor: tabColors.inactiveTint,
                 tabBarStyle: {
-                  backgroundColor: colors.background.secondary,
-                  borderTopColor: colors.border,
+                  backgroundColor: tabColors.background,
+                  borderTopColor: tabColors.border,
                   borderTopWidth: 0.5,
                   paddingBottom: 8,
                   paddingTop: 8,
                   height: 70,
-                  ...colors.shadow.sm
+                  shadowColor: isDark ? '#000000' : '#000000',
+                  shadowOffset: { width: 0, height: -1 },
+                  shadowOpacity: isDark ? 0.3 : 0.05,
+                  shadowRadius: 3,
+                  elevation: 5
                 },
                 tabBarLabelStyle: {
                   fontSize: 11,
