@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useData } from '../context/DataContext';
@@ -320,17 +320,23 @@ export const HomeScreen: React.FC = () => {
         onSubmit={handleAddTransaction}
       />
 
-      {settingsVisible && (
-        <View className="absolute top-0 left-0 right-0 bottom-0">
-          <SettingsScreen onClose={() => setSettingsVisible(false)} />
-        </View>
-      )}
+      <Modal
+        visible={settingsVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setSettingsVisible(false)}
+      >
+        <SettingsScreen onClose={() => setSettingsVisible(false)} />
+      </Modal>
 
-      {notificationsVisible && (
-        <View className="absolute top-0 left-0 right-0 bottom-0">
-          <NotificationsScreen onClose={() => setNotificationsVisible(false)} />
-        </View>
-      )}
+      <Modal
+        visible={notificationsVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setNotificationsVisible(false)}
+      >
+        <NotificationsScreen onClose={() => setNotificationsVisible(false)} />
+      </Modal>
     </SafeAreaView>
   );
 };
