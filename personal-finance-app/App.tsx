@@ -35,7 +35,7 @@ const Tab = createBottomTabNavigator();
 
 type AuthState = 'loading' | 'welcome' | 'login' | 'register' | 'unlock' | 'authenticated';
 
-export default function App() {
+const AppContent: React.FC = () => {
   const [authState, setAuthState] = useState<AuthState>('loading');
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function App() {
   // Authentication flow
   if (authState !== 'authenticated') {
     return (
-      <SafeAreaProvider>
+      <>
         {authState === 'welcome' && (
           <WelcomeScreen
             onLogin={() => setAuthState('login')}
@@ -101,17 +101,15 @@ export default function App() {
         {authState === 'unlock' && (
           <UnlockScreen onSuccess={handleAuthSuccess} />
         )}
-      </SafeAreaProvider>
+      </>
     );
   }
 
   // Main app (authenticated)
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <DataProvider>
-          <NavigationContainer>
-            <Tab.Navigator
+    <DataProvider>
+      <NavigationContainer>
+        <Tab.Navigator
               screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.primary,
@@ -175,6 +173,14 @@ export default function App() {
           </NavigationContainer>
           <DeveloperMenu />
         </DataProvider>
+  );
+};
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppContent />
       </ThemeProvider>
     </SafeAreaProvider>
   );
