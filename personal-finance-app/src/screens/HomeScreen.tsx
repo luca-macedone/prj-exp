@@ -106,16 +106,15 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      className={isDark ? 'flex-1 bg-background-primary-dark' : 'flex-1 bg-background-primary-light'}
+      className={isDark ? 'flex-1 bg-background-DEFAULT-dark' : 'flex-1 bg-background-DEFAULT-light'}
       edges={['top', 'left', 'right']}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-6">
           <View className="flex-row items-center">
-            <View className={`w-12 h-12 rounded-2xl items-center justify-center mr-3 ${
-              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
-            }`}>
+            <View className={`w-12 h-12 rounded-2xl items-center justify-center mr-3 ${isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}>
               <Ionicons name="shield-checkmark" size={24} color="#007AFF" />
             </View>
             <View>
@@ -128,9 +127,8 @@ export const HomeScreen: React.FC = () => {
             </View>
           </View>
           <TouchableOpacity
-            className={`w-10 h-10 rounded-xl items-center justify-center ${
-              isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
-            }`}
+            className={`w-10 h-10 rounded-xl items-center justify-center ${isDark ? 'bg-background-secondary-dark' : 'bg-background-secondary-light'
+              }`}
             onPress={handleNotifications}
           >
             <Ionicons
@@ -142,9 +140,8 @@ export const HomeScreen: React.FC = () => {
         </View>
 
         {/* Balance Card */}
-        <View className={`mx-4 mb-6 p-6 rounded-3xl ${
-          isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-lg'
-        }`}>
+        <View className={`mx-4 mb-6 p-6 rounded-3xl backdrop-blur-md bg-gradient-to-tr ${isDark ? 'from-transparent to-primary-DEFAULT-dark/50' : 'from-transparent to-primary-DEFAULT-light/50 shadow-md'
+          }`}>
           <View className="flex-row items-center justify-between mb-4">
             <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
               Saldo Totale
@@ -154,9 +151,8 @@ export const HomeScreen: React.FC = () => {
             </View>
           </View>
 
-          <Text className={`text-4xl font-bold mb-6 ${
-            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-          }`}>
+          <Text className={`text-4xl font-bold mb-6 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
             {formatCurrency(totalBalance)}
           </Text>
 
@@ -181,22 +177,19 @@ export const HomeScreen: React.FC = () => {
         </View>
 
         {/* Savings Goal */}
-        <View className={`mx-4 mb-6 p-5 rounded-2xl ${
-          isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-md'
-        }`}>
+        <View className={`mx-4 mb-6 p-5 rounded-2xl ${isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-md'
+          }`}>
           <View className="flex-row items-center justify-between mb-3">
-            <Text className={`font-semibold ${
-              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-            }`}>
+            <Text className={`font-semibold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
               Obiettivo Risparmio
             </Text>
             <Text className={isDark ? 'text-text-secondary-dark text-sm' : 'text-text-secondary-light text-sm'}>
               {savingsProgress.toFixed(0)}%
             </Text>
           </View>
-          <View className={`h-2 rounded-full mb-2 ${
-            isDark ? 'bg-background-secondary-dark' : 'bg-gray-200'
-          }`}>
+          <View className={`h-2 rounded-full mb-2 ${isDark ? 'bg-background-secondary-dark' : 'bg-gray-200'
+            }`}>
             <View
               className="h-full bg-primary rounded-full"
               style={{ width: `${Math.min(savingsProgress, 100)}%` }}
@@ -214,9 +207,8 @@ export const HomeScreen: React.FC = () => {
 
         {/* Quick Actions */}
         <View className="px-4 mb-6">
-          <Text className={`text-base font-bold mb-4 ${
-            isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-          }`}>
+          <Text className={`text-base font-bold mb-4 ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+            }`}>
             Azioni Rapide
           </Text>
           <View className="flex-row flex-wrap justify-between">
@@ -224,15 +216,13 @@ export const HomeScreen: React.FC = () => {
               className="w-[48%] mb-3"
               onPress={handleQuickAdd}
             >
-              <View className={`items-center p-4 rounded-2xl ${
-                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
-              }`}>
+              <View className={`items-center p-4 rounded-2xl ${isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+                }`}>
                 <View className="w-14 h-14 rounded-2xl bg-primary/20 items-center justify-center mb-2">
                   <Ionicons name="add" size={28} color="#007AFF" />
                 </View>
-                <Text className={`text-sm font-semibold ${
-                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-                }`}>
+                <Text className={`text-sm font-semibold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
                   Aggiungi
                 </Text>
               </View>
@@ -242,15 +232,13 @@ export const HomeScreen: React.FC = () => {
               className="w-[48%] mb-3"
               onPress={handleTransfer}
             >
-              <View className={`items-center p-4 rounded-2xl ${
-                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
-              }`}>
+              <View className={`items-center p-4 rounded-2xl ${isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+                }`}>
                 <View className="w-14 h-14 rounded-2xl bg-warning/20 items-center justify-center mb-2">
                   <Ionicons name="swap-horizontal" size={28} color="#F59E0B" />
                 </View>
-                <Text className={`text-sm font-semibold ${
-                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-                }`}>
+                <Text className={`text-sm font-semibold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
                   Trasferisci
                 </Text>
               </View>
@@ -260,15 +248,13 @@ export const HomeScreen: React.FC = () => {
               className="w-[48%] mb-3"
               onPress={handleAnalyze}
             >
-              <View className={`items-center p-4 rounded-2xl ${
-                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
-              }`}>
+              <View className={`items-center p-4 rounded-2xl ${isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+                }`}>
                 <View className="w-14 h-14 rounded-2xl bg-success/20 items-center justify-center mb-2">
                   <Ionicons name="stats-chart" size={28} color="#10B981" />
                 </View>
-                <Text className={`text-sm font-semibold ${
-                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-                }`}>
+                <Text className={`text-sm font-semibold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
                   Analizza
                 </Text>
               </View>
@@ -278,15 +264,13 @@ export const HomeScreen: React.FC = () => {
               className="w-[48%] mb-3"
               onPress={handleMore}
             >
-              <View className={`items-center p-4 rounded-2xl ${
-                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
-              }`}>
+              <View className={`items-center p-4 rounded-2xl ${isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+                }`}>
                 <View className="w-14 h-14 rounded-2xl bg-info/20 items-center justify-center mb-2">
                   <Ionicons name="settings" size={28} color="#3B82F6" />
                 </View>
-                <Text className={`text-sm font-semibold ${
-                  isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-                }`}>
+                <Text className={`text-sm font-semibold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                  }`}>
                   Altro
                 </Text>
               </View>
@@ -297,9 +281,8 @@ export const HomeScreen: React.FC = () => {
         {/* Recent Transactions */}
         <View className="px-4 mb-6">
           <View className="flex-row items-center justify-between mb-4">
-            <Text className={`text-base font-bold ${
-              isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-            }`}>
+            <Text className={`text-base font-bold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+              }`}>
               Transazioni Recenti
             </Text>
             <TouchableOpacity onPress={handleViewAllTransactions}>
@@ -310,18 +293,16 @@ export const HomeScreen: React.FC = () => {
           {transactions.slice(0, 3).map((transaction) => (
             <View
               key={transaction.id}
-              className={`flex-row items-center justify-between p-4 rounded-2xl mb-3 ${
-                isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
-              }`}
+              className={`flex-row items-center justify-between p-4 rounded-2xl mb-3 ${isDark ? 'bg-background-card-dark' : 'bg-background-card-light shadow-sm'
+                }`}
             >
               <View className="flex-row items-center flex-1">
                 <View className="w-12 h-12 rounded-2xl bg-category-food/20 items-center justify-center mr-3">
                   <Ionicons name="restaurant" size={20} color="#FF6B6B" />
                 </View>
                 <View className="flex-1">
-                  <Text className={`font-semibold ${
-                    isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
-                  }`}>
+                  <Text className={`font-semibold ${isDark ? 'text-text-primary-dark' : 'text-text-primary-light'
+                    }`}>
                     {transaction.description}
                   </Text>
                   <Text className={isDark ? 'text-text-tertiary-dark text-xs' : 'text-text-tertiary-light text-xs'}>
@@ -329,9 +310,8 @@ export const HomeScreen: React.FC = () => {
                   </Text>
                 </View>
               </View>
-              <Text className={`text-base font-bold ${
-                transaction.amount < 0 ? 'text-error' : 'text-success'
-              }`}>
+              <Text className={`text-base font-bold ${transaction.amount < 0 ? 'text-error' : 'text-success'
+                }`}>
                 {transaction.amount < 0 ? '-' : '+'}
                 {formatCurrency(Math.abs(transaction.amount))}
               </Text>
